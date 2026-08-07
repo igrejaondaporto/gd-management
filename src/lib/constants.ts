@@ -20,14 +20,21 @@ export const colors = {
   roseSoft: "#F1DAD9",
 } as const;
 
-// person category mapping
+// person category mapping (keys in English, labels in Portuguese for UI)
 export const categoryColors = {
-  visitante: { color: colors.rose, bg: colors.roseSoft },
-  frequentador: { color: colors.gold, bg: colors.goldSoft },
-  membro: { color: colors.primary, bg: colors.primarySoft },
+  visitor: { color: colors.rose, bg: colors.roseSoft, label: "Visitante" },
+  attender: { color: colors.gold, bg: colors.goldSoft, label: "Frequentador" },
+  member: { color: colors.primary, bg: colors.primarySoft, label: "Membro" },
 } as const;
 
 export type Category = keyof typeof categoryColors;
+
+// role display labels (keys in English, labels in Portuguese for UI)
+export const ROLE_LABELS: Record<string, string> = {
+  leader: "Líder",
+  supervisor: "Supervisor",
+  pastor: "Pastor",
+};
 
 export const MONTHS_PT = [
   "jan",

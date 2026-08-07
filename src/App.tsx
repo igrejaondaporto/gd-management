@@ -71,17 +71,13 @@ function App() {
             ).map((cat) => (
               <span
                 key={cat}
-                className="font-body text-xs font-semibold px-3 py-1.5 rounded-full"
+                className="rounded-full px-3 py-1.5 font-body text-xs font-semibold"
                 style={{
                   color: categoryColors[cat].color,
                   background: categoryColors[cat].bg,
                 }}
               >
-                {cat === "visitante"
-                  ? "Visitante"
-                  : cat === "frequentador"
-                    ? "Frequentador"
-                    : "Membro"}
+                {categoryColors[cat].label}
               </span>
             ))}
           </div>
