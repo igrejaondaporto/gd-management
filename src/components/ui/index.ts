@@ -1,2 +1,11 @@
-// Shared UI components — Avatar, Pill, PersonChip, etc.
-export {};
+export { IconButton } from "./IconButton";
+export { Pill } from "./Pill";
+export { Avatar } from "./Avatar";
+export { StampBadge } from "./StampBadge";
+export { PersonChip } from "./PersonChip";
+export { NameInput } from "./NameInput";
+export { AddedNameChip } from "./AddedNameChip";
+export { SectionLabel } from "./SectionLabel";
+export { MiniStat } from "./MiniStat";
+export { Delta } from "./Delta";
+export { BottomNav } from "./BottomNav";

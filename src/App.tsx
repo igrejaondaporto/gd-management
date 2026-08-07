@@ -1,4 +1,19 @@
+import { useState } from "react";
+import { Home, ClipboardList, BarChart3 } from "lucide-react";
 import { colors, categoryColors } from "@/lib/constants";
+import {
+  IconButton,
+  Pill,
+  Avatar,
+  StampBadge,
+  PersonChip,
+  NameInput,
+  AddedNameChip,
+  SectionLabel,
+  MiniStat,
+  Delta,
+  BottomNav,
+} from "@/components/ui";
 
 const swatches = [
   { name: "paper", hex: colors.paper },
@@ -19,24 +34,26 @@ const swatches = [
 ];
 
 function App() {
+  const [activeTab, setActiveTab] = useState("home");
+  const [chipSelected, setChipSelected] = useState(false);
+  const [chips, setChips] = useState<string[]>([]);
+
   return (
     <div className="min-h-screen bg-paper p-8">
       <div className="mx-auto max-w-lg space-y-8">
         {/* Header */}
         <div>
           <h1 className="font-display text-2xl font-bold text-ink">
-            Presença GD
+            Componentes UI
           </h1>
-          <p className="font-body text-sm text-ink-soft mt-1">
-            Paleta de cores · Tipografia · Design Tokens
+          <p className="mt-1 font-body text-sm text-ink-soft">
+            Portados do prototipo &middot; Tailwind
           </p>
         </div>
 
         {/* Color Swatches */}
         <section>
-          <h2 className="font-body text-xs font-bold text-ink-faint uppercase tracking-wider mb-3">
-            Cores
-          </h2>
+          <SectionLabel>Paleta de cores</SectionLabel>
           <div className="grid grid-cols-2 gap-2">
             {swatches.map((s) => (
               <div
@@ -60,141 +77,191 @@ function App() {
           </div>
         </section>
 
-        {/* Categories */}
+        {/* Categories (Pill) */}
         <section>
-          <h2 className="font-body text-xs font-bold text-ink-faint uppercase tracking-wider mb-3">
-            Categorias
-          </h2>
+          <SectionLabel>Categorias (Pill)</SectionLabel>
           <div className="flex flex-wrap gap-2">
             {(
               Object.keys(categoryColors) as Array<keyof typeof categoryColors>
             ).map((cat) => (
-              <span
+              <Pill
                 key={cat}
-                className="rounded-full px-3 py-1.5 font-body text-xs font-semibold"
-                style={{
-                  color: categoryColors[cat].color,
-                  background: categoryColors[cat].bg,
-                }}
+                color={categoryColors[cat].color}
+                bg={categoryColors[cat].bg}
               >
                 {categoryColors[cat].label}
-              </span>
+              </Pill>
             ))}
           </div>
         </section>
 
-        {/* Typography */}
+        {/* Avatar */}
         <section>
-          <h2 className="font-body text-xs font-bold text-ink-faint uppercase tracking-wider mb-3">
-            Tipografia
-          </h2>
-
-          <div className="space-y-4 rounded-xl border border-line bg-card p-4">
-            <div>
-              <div className="font-body text-[10px] font-bold text-ink-faint uppercase">
-                Fraunces · Display
-              </div>
-              <div className="font-display text-xl font-bold text-ink">
-                A igreja reunida como família
-              </div>
-              <div className="font-display text-sm font-semibold text-ink-soft mt-1">
-                Pesos: 600 (semibold) · 700 (bold)
-              </div>
-            </div>
-
-            <div className="border-t border-line-soft pt-4">
-              <div className="font-body text-[10px] font-bold text-ink-faint uppercase">
-                Public Sans · Body
-              </div>
-              <p className="font-body text-sm text-ink leading-relaxed mt-1">
-                Toque para marcar presença. Sugerimos quem visitou o GD
-                recentemente.
-              </p>
-              <div className="flex gap-4 mt-2">
-                <span className="font-body text-xs font-normal text-ink-soft">
-                  Regular
-                </span>
-                <span className="font-body text-xs font-medium text-ink-soft">
-                  Medium
-                </span>
-                <span className="font-body text-xs font-semibold text-ink">
-                  Semi
-                </span>
-                <span className="font-body text-xs font-bold text-ink">
-                  Bold
-                </span>
-              </div>
-            </div>
-
-            <div className="border-t border-line-soft pt-4">
-              <div className="font-body text-[10px] font-bold text-ink-faint uppercase">
-                JetBrains Mono · Mono
-              </div>
-              <div className="font-mono text-lg font-bold text-primary mt-1">
-                247 pessoas
-              </div>
-              <div className="font-mono text-xs font-semibold text-ink-soft">
-                +12 vs. semana anterior
-              </div>
-            </div>
+          <SectionLabel>Avatar</SectionLabel>
+          <div className="flex flex-wrap items-center gap-3">
+            <Avatar
+              name="Ana Souza"
+              color={categoryColors.member.color}
+              bg={categoryColors.member.bg}
+              size={40}
+            />
+            <Avatar
+              name="Bruno Lima"
+              color={categoryColors.member.color}
+              bg={categoryColors.member.bg}
+            />
+            <Avatar
+              name="Carla N"
+              color={categoryColors.member.color}
+              bg={categoryColors.member.bg}
+              size={28}
+            />
+            <Avatar
+              name="Fabio T"
+              color={categoryColors.attender.color}
+              bg={categoryColors.attender.bg}
+              size={22}
+            />
+            <Avatar
+              name="Helena"
+              color={categoryColors.visitor.color}
+              bg={categoryColors.visitor.bg}
+              size={18}
+            />
           </div>
         </section>
 
-        {/* Stamp animation test */}
+        {/* PersonChip */}
         <section>
-          <h2 className="font-body text-xs font-bold text-ink-faint uppercase tracking-wider mb-3">
-            Animação · Carimbo
-          </h2>
+          <SectionLabel>PersonChip (toggle)</SectionLabel>
+          <div className="flex flex-wrap gap-2">
+            <PersonChip
+              name="Ana Souza"
+              color={categoryColors.member.color}
+              bg={categoryColors.member.bg}
+              selected={chipSelected}
+              onClick={() => setChipSelected((v) => !v)}
+            />
+            <PersonChip
+              name="Fabio Teixeira"
+              color={categoryColors.attender.color}
+              bg={categoryColors.attender.bg}
+              tag="novo"
+              dashed
+              selected={false}
+              onClick={() => {}}
+            />
+            <PersonChip
+              name="Helena Duarte"
+              color={categoryColors.visitor.color}
+              bg={categoryColors.visitor.bg}
+              selected={false}
+              onClick={() => {}}
+            />
+          </div>
+        </section>
+
+        {/* StampBadge */}
+        <section>
+          <SectionLabel>StampBadge (animacao)</SectionLabel>
           <div className="flex items-center gap-4 rounded-xl border border-line bg-card p-4">
-            <div className="relative">
-              <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center">
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <polyline points="22 4 12 14.01 9 11.01" />
-                </svg>
-              </div>
-              <div
-                className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-primary flex items-center justify-center border-2 border-card"
-                style={{
-                  animation: "stampPop 0.32s cubic-bezier(.2,1.4,.4,1) both",
-                }}
-              >
-                <svg
-                  width="10"
-                  height="10"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              </div>
+            <div className="relative inline-block">
+              <Avatar name="OK" color="#fff" bg={colors.primary} size={48} />
+              <StampBadge />
             </div>
             <div>
               <div className="font-body text-sm font-semibold text-ink">
-                Presença registrada
+                Presenca registrada
               </div>
               <div className="font-body text-xs text-ink-soft">
-                Animação stampPop funcionando
+                Animacao stampPop
               </div>
             </div>
           </div>
         </section>
 
-        <p className="font-body text-[11px] text-ink-faint text-center pb-4">
-          Remover esta página em Task 0.6 (roteamento)
+        {/* NameInput + AddedNameChip */}
+        <section>
+          <SectionLabel>NameInput + AddedNameChip</SectionLabel>
+          <NameInput
+            placeholder="Nome do visitante"
+            onAdd={(name) => setChips((v) => [...v, name])}
+          />
+          {chips.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {chips.map((name, i) => (
+                <AddedNameChip
+                  key={i}
+                  name={name}
+                  color={categoryColors.visitor.color}
+                  bg={categoryColors.visitor.bg}
+                  onRemove={() =>
+                    setChips((v) => v.filter((_, idx) => idx !== i))
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* MiniStat */}
+        <section>
+          <SectionLabel>MiniStat</SectionLabel>
+          <div className="flex gap-[10px]">
+            <MiniStat label="Pessoas no GD" value={42} />
+            <MiniStat label="Media em ago" value={12} color={colors.primary} />
+            <MiniStat label="Novos membros" value={3} color={colors.gold} />
+          </div>
+        </section>
+
+        {/* Delta */}
+        <section>
+          <SectionLabel>Delta (variacao)</SectionLabel>
+          <div className="flex flex-col gap-1 rounded-xl border border-line bg-card p-4">
+            <Delta value={5} />
+            <Delta value={-3} />
+            <Delta value={0} />
+            <Delta value={null} />
+          </div>
+        </section>
+
+        {/* IconButton */}
+        <section>
+          <SectionLabel>IconButton</SectionLabel>
+          <div className="flex items-center gap-2">
+            <IconButton onClick={() => {}} label="Chart">
+              <BarChart3 size={20} />
+            </IconButton>
+            <IconButton onClick={() => {}} label="Register">
+              <ClipboardList size={20} />
+            </IconButton>
+          </div>
+        </section>
+
+        {/* BottomNav */}
+        <section>
+          <SectionLabel>BottomNav</SectionLabel>
+          <BottomNav
+            tabs={[
+              { key: "home", label: "Inicio", icon: <Home size={20} /> },
+              {
+                key: "register",
+                label: "Registrar",
+                icon: <ClipboardList size={20} />,
+              },
+              {
+                key: "summary",
+                label: "Resumo",
+                icon: <BarChart3 size={20} />,
+              },
+            ]}
+            active={activeTab}
+            onChange={setActiveTab}
+          />
+        </section>
+
+        <p className="pb-4 text-center font-body text-[11px] text-ink-faint">
+          Remover em Task 0.6 (roteamento)
         </p>
       </div>
     </div>
