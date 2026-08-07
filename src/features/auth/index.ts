@@ -1,2 +1,1 @@
-// Auth feature — login, session, profile
-export {};
+export { AuthProvider, useSession } from "./AuthProvider";

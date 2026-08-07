@@ -33,8 +33,13 @@ Required variables:
 ### Supabase Setup
 
 1. Create a project at [supabase.com](https://supabase.com)
-2. Enable Google OAuth in Authentication → Providers
-3. Run the SQL migrations from `supabase/migrations/`
+2. **Enable Google OAuth** in Authentication → Providers → Google:
+   - Toggle **Enabled**
+   - Paste your **Client ID** and **Client Secret** from Google Cloud Console
+   - Under "Authorized Client IDs", the redirect URL is:
+     `https://waeopvgoeadyrplrfuzk.supabase.co/auth/v1/callback`
+   - Add this same URL to **Authorized redirect URIs** in your Google Cloud Console
+3. Run the SQL migrations from `supabase/migrations/` (already applied: 001, 002, 003)
 
 ### Dev
 

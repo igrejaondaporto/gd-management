@@ -1,2 +1,1 @@
-// Hooks barrel — useSession, useProfile, data hooks
-export {};
+export { useProfile } from "./useProfile";

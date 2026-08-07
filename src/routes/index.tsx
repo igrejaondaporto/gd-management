@@ -1,4 +1,4 @@
-// Route configuration — auth guards will be added in task 1.7
+// Route configuration with auth guards
 import { Routes, Route, Navigate } from "react-router-dom";
 import {
   LoginPage,
@@ -11,6 +11,7 @@ import {
   ReportsPage,
   GdDetailPage,
 } from "@/pages";
+import { ProtectedRoute } from "./ProtectedRoute";
 
 export default function AppRoutes() {
   return (
@@ -19,18 +20,67 @@ export default function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/pending" element={<PendingPage />} />
 
-      {/* Leader */}
-      <Route path="/" element={<LeaderHomePage />} />
-      <Route path="/register" element={<AttendanceFlowPage />} />
-      <Route path="/summary" element={<WeeklySummaryPage />} />
+      {/* Leader — requires approved profile with leader/supervisor/pastor role */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute allowedRoles={["leader", "supervisor", "pastor"]}>
+            <LeaderHomePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <ProtectedRoute allowedRoles={["leader"]}>
+            <AttendanceFlowPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/summary"
+        element={
+          <ProtectedRoute allowedRoles={["leader", "supervisor", "pastor"]}>
+            <WeeklySummaryPage />
+          </ProtectedRoute>
+        }
+      />
 
-      {/* Pastor */}
-      <Route path="/pastor/users" element={<UserManagementPage />} />
-      <Route path="/pastor/gds" element={<GdManagementPage />} />
+      {/* Pastor-only routes */}
+      <Route
+        path="/pastor/users"
+        element={
+          <ProtectedRoute allowedRoles={["pastor"]}>
+            <UserManagementPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/pastor/gds"
+        element={
+          <ProtectedRoute allowedRoles={["pastor"]}>
+            <GdManagementPage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Pastor / Supervisor */}
-      <Route path="/reports" element={<ReportsPage />} />
-      <Route path="/gd/:gdId" element={<GdDetailPage />} />
+      <Route
+        path="/reports"
+        element={
+          <ProtectedRoute allowedRoles={["supervisor", "pastor"]}>
+            <ReportsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/gd/:gdId"
+        element={
+          <ProtectedRoute allowedRoles={["supervisor", "pastor"]}>
+            <GdDetailPage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
