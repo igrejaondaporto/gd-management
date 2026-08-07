@@ -1,2 +1,9 @@
-// Pages barrel — one component per route
-export {};
+export { default as LoginPage } from "./LoginPage";
+export { default as PendingPage } from "./PendingPage";
+export { default as LeaderHomePage } from "./LeaderHomePage";
+export { default as AttendanceFlowPage } from "./AttendanceFlowPage";
+export { default as WeeklySummaryPage } from "./WeeklySummaryPage";
+export { default as UserManagementPage } from "./UserManagementPage";
+export { default as GdManagementPage } from "./GdManagementPage";
+export { default as ReportsPage } from "./ReportsPage";
+export { default as GdDetailPage } from "./GdDetailPage";

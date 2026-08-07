@@ -9,3 +9,4 @@ export { SectionLabel } from "./SectionLabel";
 export { MiniStat } from "./MiniStat";
 export { Delta } from "./Delta";
 export { BottomNav } from "./BottomNav";
+export { PhoneFrame } from "./PhoneFrame";
