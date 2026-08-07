@@ -1,0 +1,18 @@
+/* Reset & base — será substituído pelo Tailwind na Task 0.3 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #f5f1e6;
+  color: #232a21;
+}
+
+#root {
+  min-height: 100vh;
+}
