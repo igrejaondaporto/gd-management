@@ -24,7 +24,7 @@ export default function GdDetailPage() {
   const isLoading = peopleLoading || weeksLoading;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-paper p-6">
+    <div className="flex min-h-screen items-center justify-center bg-paper p-0 sm:p-6">
       <PhoneFrame
         title={gd?.name || "GD"}
         badge={{ label: roleLabel, color: "#A9822C", bg: "#F1E2B8" }}

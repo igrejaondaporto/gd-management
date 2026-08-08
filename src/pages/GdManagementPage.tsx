@@ -40,7 +40,7 @@ export default function GdManagementPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-paper p-6">
+    <div className="flex min-h-screen items-center justify-center bg-paper p-0 sm:p-6">
       <PhoneFrame title="GDs" badge={{ label: "pastor", color: "#A9822C", bg: "#F1E2B8" }}>
         <div className="flex flex-1 flex-col overflow-y-auto px-5 pt-4 pb-4">
           <div className="mb-4 font-display text-lg font-bold text-ink">Grupos de Discipulos</div>

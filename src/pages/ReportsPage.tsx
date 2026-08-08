@@ -8,7 +8,7 @@ export default function ReportsPage() {
   const roleLabel = data?.role ? ROLE_LABELS[data.role] : "pastor";
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-paper p-6">
+    <div className="flex min-h-screen items-center justify-center bg-paper p-0 sm:p-6">
       <PhoneFrame title="Relatorios" badge={{ label: roleLabel, color: "#A9822C", bg: "#F1E2B8" }}>
         <div className="flex flex-1 flex-col overflow-y-auto min-h-0">
           {isLoading ? (

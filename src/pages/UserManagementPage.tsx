@@ -18,7 +18,7 @@ export default function UserManagementPage() {
   const isLoading = pending.isLoading || approved.isLoading || rejected.isLoading;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-paper p-6">
+    <div className="flex min-h-screen items-center justify-center bg-paper p-0 sm:p-6">
       <PhoneFrame title="Usuarios" badge={{ label: "pastor", color: "#A9822C", bg: "#F1E2B8" }}>
         <div className="flex-1 overflow-y-auto px-5 pt-4 pb-4">
           <div className="mb-4 font-display text-lg font-bold text-ink">Gestao de Usuarios</div>

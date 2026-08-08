@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
-import { Church } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Church, ChevronLeft } from "lucide-react";
 import { Pill } from "./Pill";
 
 interface PhoneFrameProps {
@@ -19,33 +20,48 @@ export function PhoneFrame({
   onBack,
   rightSlot,
 }: PhoneFrameProps) {
+  const navigate = useNavigate();
+
   return (
-    <div className="mx-auto flex w-full max-w-[430px] min-h-[700px] flex-col overflow-hidden rounded-[26px] border border-line bg-paper shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+    <div className="mx-auto flex w-full max-w-full min-h-dvh flex-col bg-paper sm:max-w-[430px] sm:min-h-[700px] sm:rounded-[26px] sm:border sm:border-line sm:shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       {/* Header bar */}
-      <div className="flex items-center gap-2 px-5 pt-4">
-        <div className="flex h-[30px] w-[30px] items-center justify-center rounded-[9px] bg-primary">
-          <Church size={16} color="#fff" />
-        </div>
-        <div>
-          <div className="text-[10.5px] font-bold text-ink-faint tracking-[0.3px]">PRESENCA GD</div>
-          <div className="mt-[-1px] text-[12.5px] font-bold text-ink">{title}</div>
-        </div>
-        {subtitle && (
-          <span className="ml-1 text-[11px] font-semibold text-ink-soft">{subtitle}</span>
-        )}
-        {onBack && (
+      <div className="flex items-center gap-2 px-4 pt-4 pb-2 sm:px-5 sm:pt-4">
+        {/* Back button or home icon */}
+        {onBack ? (
           <button
             onClick={onBack}
-            className="ml-auto flex cursor-pointer items-center gap-[3px] border-none bg-transparent font-body text-xs font-bold text-primary"
+            className="flex shrink-0 cursor-pointer items-center gap-1 border-none bg-transparent p-1 font-body text-xs font-bold text-primary"
           >
-            voltar
+            <ChevronLeft size={18} />
+          </button>
+        ) : (
+          <button
+            onClick={() => navigate("/")}
+            className="flex shrink-0 cursor-pointer items-center justify-center rounded-[9px] border-none bg-primary p-0"
+            style={{ width: 30, height: 30 }}
+            aria-label="Ir para inicio"
+          >
+            <Church size={16} color="#fff" />
           </button>
         )}
+
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-[10.5px] font-bold text-ink-faint tracking-[0.3px]">
+            PRESENCA GD
+          </div>
+          <div className="mt-[-1px] truncate text-[12.5px] font-bold text-ink">{title}</div>
+        </div>
+
+        {subtitle && (
+          <span className="shrink-0 text-[11px] font-semibold text-ink-soft">{subtitle}</span>
+        )}
+
         {badge && (
           <Pill color={badge.color} bg={badge.bg}>
             {badge.label}
           </Pill>
         )}
+
         {rightSlot}
       </div>
 

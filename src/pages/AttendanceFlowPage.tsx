@@ -30,7 +30,7 @@ export default function AttendanceFlowPage() {
   const isLoading = gdLoading || (!!effectiveGd && (peopleLoading || weeksLoading));
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-paper p-6">
+    <div className="flex min-h-screen items-center justify-center bg-paper p-0 sm:p-6">
       <PhoneFrame
         title={effectiveGd?.gdName || (isMulti && !effectiveGd ? "Grupos" : "GD")}
         rightSlot={<AdminMenu />}

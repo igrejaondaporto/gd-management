@@ -14,7 +14,7 @@ export default function PendingPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-paper p-6">
+    <div className="flex min-h-screen items-center justify-center bg-paper p-0 sm:p-6">
       <PhoneFrame title="Presenca GD">
         <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
           <div className="mb-4 flex h-[72px] w-[72px] items-center justify-center rounded-full bg-gold-soft">

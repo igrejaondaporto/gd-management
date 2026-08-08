@@ -43,7 +43,7 @@ export default function LeaderHomePage() {
   const leaderName = profile?.fullName || profile?.email || "Lider";
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-paper p-6">
+    <div className="flex min-h-screen items-center justify-center bg-paper p-0 sm:p-6">
       <PhoneFrame
         title={effectiveGd?.gdName || (isMulti ? "Grupos" : "GD")}
         rightSlot={<AdminMenu />}
