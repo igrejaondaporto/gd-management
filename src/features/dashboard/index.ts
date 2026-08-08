@@ -1,2 +1,1 @@
-// Dashboard feature — aggregate reports for pastor/supervisor
-export {};
+export { PastorHome } from "./components/PastorHome";
