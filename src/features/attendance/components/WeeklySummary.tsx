@@ -85,9 +85,11 @@ function useMonthAttendance(gdId: string | undefined, mKey: string) {
 }
 
 export function WeeklySummary({ weeks, gdId }: Props) {
-  const [idx, setIdx] = useState(weeks.length > 0 ? weeks.length - 1 : 0);
-  const prevWeek = idx > 0 ? weeks[idx - 1] : null;
+  // weeks are sorted by date desc (newest first). idx 0 = most recent week.
+  const [idx, setIdx] = useState(0);
   const week = weeks[idx];
+  // The "previous" week for comparison is the next one in the list (older)
+  const prevWeek = idx < weeks.length - 1 ? weeks[idx + 1] : null;
   const { data: curr, isLoading } = useWeekAttendance(week?.id);
   const { data: prev } = useWeekAttendance(prevWeek?.id);
   const delta = curr && prev ? curr.total - prev.total : null;
@@ -104,18 +106,18 @@ export function WeeklySummary({ weeks, gdId }: Props) {
   return (
     <div className="px-5 pt-4 pb-6">
       <div className="mb-[18px] flex items-center justify-between">
-        <IconButton onClick={() => setIdx((i) => Math.max(0, i - 1))} label="Semana anterior">
-          <ChevronLeft size={20} color={idx === 0 ? "#9A9A8A" : "#232A21"} />
+        <IconButton
+          onClick={() => setIdx((i) => Math.min(weeks.length - 1, i + 1))}
+          label="Semana anterior"
+        >
+          <ChevronLeft size={20} color={idx === weeks.length - 1 ? "#9A9A8A" : "#232A21"} />
         </IconButton>
         <div className="text-center">
           <div className="font-body text-[11px] font-bold text-ink-faint uppercase">Semana de</div>
           <div className="font-display text-[19px] font-bold text-ink">{week.label}</div>
         </div>
-        <IconButton
-          onClick={() => setIdx((i) => Math.min(weeks.length - 1, i + 1))}
-          label="Proxima semana"
-        >
-          <ChevronRight size={20} color={idx === weeks.length - 1 ? "#9A9A8A" : "#232A21"} />
+        <IconButton onClick={() => setIdx((i) => Math.max(0, i - 1))} label="Proxima semana">
+          <ChevronRight size={20} color={idx === 0 ? "#9A9A8A" : "#232A21"} />
         </IconButton>
       </div>
 
