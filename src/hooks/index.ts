@@ -14,3 +14,5 @@ export {
   useUnlinkStaff,
 } from "./useGds";
 export type { GdWithStaff } from "./useGds";
+export { usePeople, useAddPerson, useUpdatePerson, useBulkAddPeople } from "./usePeople";
+export { useWeeks, useCreateWeek, useWeekAttendance } from "./useWeeks";
