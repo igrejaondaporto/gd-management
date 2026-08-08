@@ -1,33 +1,86 @@
+import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { ClipboardList } from "lucide-react";
 import { MiniStat } from "@/components/ui/MiniStat";
 import { monthKey } from "@/lib/utils";
+import { supabase } from "@/lib/supabaseClient";
 import { MONTHS_PT, colors } from "@/lib/constants";
 import type { Person, Week } from "@/types";
 
 interface LeaderHomeProps {
+  gdId: string;
   gdName: string;
   leaderName: string;
   people: Person[];
   weeks: Week[];
   onStartFlow: () => void;
   readOnly?: boolean;
+  onViewSummary?: () => void;
+}
+
+function useWeekPresentCount(weekId: string | undefined) {
+  return useQuery({
+    queryKey: ["weekPresentCount", weekId],
+    queryFn: async () => {
+      if (!weekId) return 0;
+      const { count, error } = await supabase
+        .from("attendance")
+        .select("*", { count: "exact", head: true })
+        .eq("week_id", weekId);
+      if (error) throw error;
+      return count ?? 0;
+    },
+    enabled: !!weekId,
+  });
+}
+
+function useMonthStats(gdId: string | undefined, mKey: string) {
+  return useQuery({
+    queryKey: ["monthStats", gdId, mKey],
+    queryFn: async () => {
+      if (!gdId) return { weekCount: 0, avg: 0 };
+      const { data: monthWeeks } = await supabase
+        .from("weeks")
+        .select("id")
+        .eq("gd_id", gdId)
+        .gte("date", `${mKey}-01`)
+        .lte("date", `${mKey}-31`);
+      if (!monthWeeks?.length) return { weekCount: 0, avg: 0 };
+
+      let total = 0;
+      for (const w of monthWeeks) {
+        const { count } = await supabase
+          .from("attendance")
+          .select("*", { count: "exact", head: true })
+          .eq("week_id", w.id);
+        total += count ?? 0;
+      }
+      return { weekCount: monthWeeks.length, avg: Math.round(total / monthWeeks.length) };
+    },
+    enabled: !!gdId,
+  });
 }
 
 export function LeaderHome({
+  gdId,
   gdName,
   leaderName,
   people,
   weeks,
   onStartFlow,
   readOnly = false,
+  onViewSummary,
 }: LeaderHomeProps) {
+  const navigate = useNavigate();
   const lastWeek = weeks.length > 0 ? weeks[0] : null;
-  const totalPeople = people.length;
   const currentMonthKey = lastWeek ? monthKey(lastWeek.date) : "2026-08";
-  const weeksThisMonth = weeks.filter((w) => monthKey(w.date) === currentMonthKey);
   const newMembers = people.filter(
     (p) => p.category === "member" && p.memberSince && monthKey(p.memberSince) === currentMonthKey,
   ).length;
+  const monthName = MONTHS_PT[parseInt(currentMonthKey.split("-")[1], 10) - 1];
+
+  const { data: presentCount } = useWeekPresentCount(lastWeek?.id);
+  const { data: monthStats } = useMonthStats(gdId, currentMonthKey);
 
   return (
     <div className="px-5 pt-[18px] pb-6">
@@ -45,45 +98,44 @@ export function LeaderHome({
             <div className="font-body text-[11px] font-bold opacity-75 uppercase tracking-[0.5px]">
               Registro semanal
             </div>
-            <div className="mt-0.5 font-display text-[17px] font-bold">
-              Registrar presenca de hoje
-            </div>
+            <div className="mt-0.5 font-display text-[17px] font-bold">Registrar presenca</div>
           </div>
           <ClipboardList size={26} />
         </button>
       )}
 
-      {lastWeek ? (
-        <div className="mb-4 rounded-[14px] border border-line bg-card px-4 py-[14px]">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="font-body text-[11.5px] font-bold text-ink-faint">
-                Ultima semana registrada
-              </div>
-              <div className="mt-px font-display text-base font-bold text-ink">
-                {lastWeek.label}
-              </div>
+      <button
+        onClick={onViewSummary}
+        className="mb-4 w-full cursor-pointer rounded-[14px] border border-line bg-card px-4 py-[14px] text-left"
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="font-body text-[11.5px] font-bold text-ink-faint">
+              {lastWeek ? "Ultima semana registrada" : "Nenhuma semana"}
             </div>
-            <div className="text-right">
-              <div className="font-mono text-[22px] font-bold text-primary">?</div>
-              <div className="font-body text-[10.5px] text-ink-faint">presentes</div>
+            <div className="mt-px font-display text-base font-bold text-ink">
+              {lastWeek ? lastWeek.label : "toque para ver"}
             </div>
           </div>
+          <div className="text-right">
+            <div className="font-mono text-[22px] font-bold text-primary">
+              {presentCount ?? "—"}
+            </div>
+            <div className="font-body text-[10.5px] text-ink-faint">presentes</div>
+          </div>
         </div>
-      ) : (
-        <div className="mb-4 rounded-[14px] border border-dashed border-line bg-paper-alt p-4 font-body text-[13px] text-ink-soft">
-          Nenhuma semana registrada ainda.
-          {readOnly
-            ? " Aguardando o lider registrar a primeira presenca."
-            : ' Toque em "Registrar presenca" para comecar.'}
-        </div>
-      )}
+      </button>
 
-      <div className="flex gap-[10px]">
-        <MiniStat label="Pessoas no GD" value={totalPeople} />
+      <div className="mb-5 flex gap-[10px]">
+        <button
+          onClick={() => navigate(`/gd/${gdId}/people`)}
+          className="flex-1 cursor-pointer border-none bg-transparent p-0 text-left"
+        >
+          <MiniStat label="Pessoas no GD" value={people.length} />
+        </button>
         <MiniStat
-          label={`Media em ${MONTHS_PT[parseInt(currentMonthKey.split("-")[1], 10) - 1]}`}
-          value={weeksThisMonth.length ? "?" : "—"}
+          label={`Media em ${monthName}`}
+          value={monthStats?.weekCount ? monthStats.avg : "—"}
           color={colors.primary}
         />
         <MiniStat label="Novos membros" value={newMembers} color={colors.gold} />

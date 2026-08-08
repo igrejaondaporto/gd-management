@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { ClipboardList, BarChart3 } from "lucide-react";
 import { PhoneFrame } from "@/components/ui/PhoneFrame";
 import { AdminDrawer } from "@/features/auth";
 import { LeaderHome } from "@/features/attendance";
@@ -11,17 +12,11 @@ import { useAllGds } from "@/hooks/useAllGds";
 import { useProfile } from "@/hooks/useProfile";
 import { ROLE_LABELS } from "@/lib/constants";
 
-type SubTab = "home" | "register" | "summary";
-
-const SUB_TABS: { key: SubTab; label: string }[] = [
-  { key: "home", label: "Inicio" },
-  { key: "register", label: "Registrar" },
-  { key: "summary", label: "Resumo" },
-];
+type View = "home" | "register" | "summary";
 
 export default function GdDetailPage() {
   const { gdId } = useParams<{ gdId: string }>();
-  const [tab, setTab] = useState<SubTab>("home");
+  const [view, setView] = useState<View>("home");
   const navigate = useNavigate();
 
   const { data: allGds } = useAllGds();
@@ -42,71 +37,71 @@ export default function GdDetailPage() {
         rightSlot={<AdminDrawer />}
       >
         <div className="flex flex-1 flex-col min-h-0">
-          {/* Sub navigation */}
-          <div className="flex border-b border-line-soft px-4">
-            {SUB_TABS.map((t) => (
-              <button
-                key={t.key}
-                onClick={() => setTab(t.key)}
-                className="relative cursor-pointer border-none bg-transparent px-4 py-3 font-body text-[13px] font-semibold"
-                style={{ color: tab === t.key ? "#266BC6" : "#9A9A8A" }}
-              >
-                {t.label}
-                {tab === t.key && (
-                  <div className="absolute bottom-0 left-1/2 h-[2.5px] w-5 -translate-x-1/2 rounded-full bg-primary" />
-                )}
-              </button>
-            ))}
-          </div>
-
           {/* Content */}
           <div className="flex flex-1 flex-col overflow-y-auto">
             {isLoading ? (
               <div className="flex flex-1 items-center justify-center">
                 <div className="h-6 w-6 animate-spin rounded-full border-[2.5px] border-primary border-t-transparent" />
               </div>
-            ) : (
-              <>
-                {tab === "home" && (
-                  <LeaderHome
-                    gdName={gd?.name || "GD"}
-                    leaderName={
-                      gd?.staff
-                        .filter((s) => s.profileRole === "leader")
-                        .map((s) => s.profileName)
-                        .join(" e ") || "Lider"
-                    }
-                    people={people}
-                    weeks={weeks}
-                    onStartFlow={() => setTab("register")}
-                    readOnly={!!profile?.role && profile.role !== "leader"}
-                  />
-                )}
-                {tab === "register" && (
-                  <AttendanceFlow
-                    gdId={gdId!}
-                    gdName={gd?.name || "GD"}
-                    people={people}
-                    weeks={weeks}
-                    onExit={() => setTab("home")}
-                  />
-                )}
-                {tab === "summary" && weeks.length > 0 && (
-                  <WeeklySummary weeks={weeks} people={people} />
-                )}
-                {tab === "summary" && weeks.length === 0 && (
-                  <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
-                    <div className="font-display text-[17px] font-bold text-ink">
-                      Nenhum dado ainda
-                    </div>
-                    <div className="mt-1 font-body text-[13px] text-ink-faint">
-                      Assim que a primeira semana for registrada, o resumo aparece aqui.
-                    </div>
+            ) : view === "register" ? (
+              <AttendanceFlow
+                gdId={gdId!}
+                gdName={gd?.name || "GD"}
+                people={people}
+                weeks={weeks}
+                onExit={() => setView("home")}
+              />
+            ) : view === "summary" ? (
+              weeks.length > 0 ? (
+                <WeeklySummary weeks={weeks} gdId={gdId!} />
+              ) : (
+                <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
+                  <BarChart3 size={30} className="mb-[10px] text-ink-faint" />
+                  <div className="font-display text-[17px] font-bold text-ink">
+                    Nenhum dado ainda
                   </div>
-                )}
-              </>
+                  <div className="mt-1 font-body text-[13px] text-ink-faint">
+                    Assim que a primeira semana for registrada, o resumo aparece aqui.
+                  </div>
+                </div>
+              )
+            ) : (
+              <LeaderHome
+                gdId={gdId!}
+                gdName={gd?.name || "GD"}
+                leaderName={
+                  gd?.staff
+                    .filter((s) => s.profileRole === "leader")
+                    .map((s) => s.profileName)
+                    .join(" e ") || "Lider"
+                }
+                people={people}
+                weeks={weeks}
+                onStartFlow={() => setView("register")}
+                onViewSummary={() => setView("summary")}
+              />
             )}
           </div>
+
+          {/* Action buttons — visible on home */}
+          {view === "home" && (
+            <div className="flex gap-3 border-t border-line-soft px-5 py-4">
+              <button
+                onClick={() => setView("register")}
+                className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border-none bg-primary px-4 py-3.5 font-body text-[13.5px] font-bold text-white"
+              >
+                <ClipboardList size={18} />
+                Registrar semana
+              </button>
+              <button
+                onClick={() => setView("summary")}
+                className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border-[1.5px] border-line bg-card px-4 py-3.5 font-body text-[13.5px] font-bold text-ink"
+              >
+                <BarChart3 size={18} />
+                Ver resumo
+              </button>
+            </div>
+          )}
         </div>
       </PhoneFrame>
     </div>

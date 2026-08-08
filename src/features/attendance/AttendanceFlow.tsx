@@ -51,8 +51,9 @@ export function AttendanceFlow({ gdId, gdName, people, weeks, onExit }: Attendan
   }, []);
 
   const lastWeek = weeks.length > 0 ? weeks[weeks.length - 1] : null;
-  const nextDate = lastWeek ? addDays(lastWeek.date, 7) : "2026-08-04";
-  const nextLabel = formatWeekLabel(nextDate);
+  const defaultDate = lastWeek ? addDays(lastWeek.date, 7) : "2026-08-04";
+  const [selectedDate, setSelectedDate] = useState(defaultDate);
+  const nextLabel = formatWeekLabel(selectedDate);
 
   const attenders = useMemo(() => people.filter((p) => p.category === "attender"), [people]);
   const members = useMemo(() => people.filter((p) => p.category === "member"), [people]);
@@ -120,7 +121,7 @@ export function AttendanceFlow({ gdId, gdName, people, weeks, onExit }: Attendan
       ...manualMemberNames.map((name) => ({
         name,
         category: "member" as Category,
-        memberSince: nextDate,
+        memberSince: selectedDate,
       })),
     ];
 
@@ -133,7 +134,7 @@ export function AttendanceFlow({ gdId, gdName, people, weeks, onExit }: Attendan
       ...Array.from(upgradeAttenderIds).map((id) => ({
         personId: id,
         newCategory: "member" as Category,
-        memberSince: nextDate,
+        memberSince: selectedDate,
       })),
     ];
 
@@ -148,7 +149,7 @@ export function AttendanceFlow({ gdId, gdName, people, weeks, onExit }: Attendan
       })),
     ];
 
-    createWeek.mutate({ gdId, date: nextDate, newPeople, promotions, attendance });
+    createWeek.mutate({ gdId, date: selectedDate, newPeople, promotions, attendance });
     setStep(4);
   };
 
@@ -177,7 +178,15 @@ export function AttendanceFlow({ gdId, gdName, people, weeks, onExit }: Attendan
           >
             <ChevronLeft size={20} />
           </IconButton>
-          <div className="font-body text-xs font-bold text-ink-faint">Passo {step + 1} de 4</div>
+          <div className="text-center">
+            <div className="font-body text-xs font-bold text-ink-faint">Passo {step + 1} de 4</div>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="mt-1 cursor-pointer rounded-lg border border-line bg-transparent px-2 py-1 text-center font-mono text-[12px] font-bold text-ink outline-none"
+            />
+          </div>
           <IconButton onClick={onExit} label="Fechar">
             <X size={18} />
           </IconButton>

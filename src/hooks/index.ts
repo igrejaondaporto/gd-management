@@ -19,3 +19,5 @@ export { useWeeks, useCreateWeek, useWeekAttendance } from "./useWeeks";
 export { useAllGds } from "./useAllGds";
 export { useLeaderGd, useFirstLeaderGd } from "./useLeaderGd";
 export type { LeaderGd } from "./useLeaderGd";
+export { useWeekStats, useMonthPersonAttendance } from "./useWeekStats";
+export type { WeekStats } from "./useWeekStats";

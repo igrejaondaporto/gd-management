@@ -14,7 +14,7 @@ interface BottomNavProps {
 
 export function BottomNav({ tabs, active, onChange }: BottomNavProps) {
   return (
-    <div className="sticky bottom-0 flex border-t border-line-soft bg-card pb-safe">
+    <div className="sticky bottom-0 flex w-full border-t border-line-soft bg-card pb-safe sm:mx-auto sm:max-w-[430px]">
       {tabs.map((t) => (
         <button
           key={t.key}

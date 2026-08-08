@@ -1,91 +1,108 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, Minus } from "lucide-react";
 import { IconButton } from "@/components/ui/IconButton";
 import { Avatar } from "@/components/ui/Avatar";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { supabase } from "@/lib/supabaseClient";
-import { monthKey, monthLabel } from "@/lib/utils";
+import { monthKey } from "@/lib/utils";
 import { categoryColors } from "@/lib/constants";
-import type { Person, Week, Category } from "@/types";
-
-const CAT_ORDER: Record<Category, number> = { member: 0, attender: 1, visitor: 2 };
-
-interface WeekAttendance {
-  total: number;
-  delta: number | null;
-  byCat: Record<Category, number>;
-}
+import type { Week, Category } from "@/types";
 
 interface Props {
   weeks: Week[];
-  people: Person[];
+  gdId: string;
 }
 
-function useWeekAttendanceCounts(weekId: string | undefined) {
+interface AttendeeRow {
+  personId: string;
+  name: string;
+  categoryAtTime: Category;
+}
+
+function useWeekAttendance(weekId: string | undefined) {
   return useQuery({
-    queryKey: ["attendance-counts", weekId],
-    queryFn: async (): Promise<WeekAttendance> => {
-      if (!weekId) return { total: 0, delta: null, byCat: { visitor: 0, attender: 0, member: 0 } };
+    queryKey: ["weekAttendance", weekId],
+    queryFn: async (): Promise<{
+      total: number;
+      byCat: Record<Category, number>;
+      attendees: AttendeeRow[];
+    }> => {
+      const empty = {
+        total: 0,
+        byCat: { visitor: 0, attender: 0, member: 0 } as Record<Category, number>,
+        attendees: [] as AttendeeRow[],
+      };
+      if (!weekId) return empty;
       const { data, error } = await supabase
         .from("attendance")
-        .select("category_at_time")
-        .eq("week_id", weekId);
-
+        .select("person_id, category_at_time, people:person_id(name)")
+        .eq("week_id", weekId)
+        .order("category_at_time");
       if (error) throw error;
       const byCat: Record<Category, number> = { visitor: 0, attender: 0, member: 0 };
-      (data || []).forEach((r: Record<string, unknown>) => {
+      const attendees: AttendeeRow[] = (data || []).map((r: Record<string, unknown>) => {
         const cat = r.category_at_time as Category;
-        if (cat in byCat) byCat[cat]++;
+        byCat[cat]++;
+        const p = r.people as unknown as Record<string, unknown> | null;
+        return {
+          personId: r.person_id as string,
+          name: (p?.name as string) || "?",
+          categoryAtTime: cat,
+        };
       });
-      return { total: data?.length || 0, delta: null, byCat };
+      return { total: data?.length || 0, byCat, attendees };
     },
     enabled: !!weekId,
   });
 }
 
-export function WeeklySummary({ weeks, people }: Props) {
+function useMonthAttendance(gdId: string | undefined, mKey: string) {
+  return useQuery({
+    queryKey: ["monthAttendance", gdId, mKey],
+    queryFn: async (): Promise<{ weekCount: number; personCounts: Record<string, number> }> => {
+      if (!gdId) return { weekCount: 0, personCounts: {} };
+      const { data: monthWeeks } = await supabase
+        .from("weeks")
+        .select("id")
+        .eq("gd_id", gdId)
+        .gte("date", `${mKey}-01`)
+        .lte("date", `${mKey}-31`);
+      if (!monthWeeks?.length) return { weekCount: 0, personCounts: {} };
+      const weekIds = monthWeeks.map((w) => w.id);
+      const { data: att } = await supabase
+        .from("attendance")
+        .select("person_id")
+        .in("week_id", weekIds);
+      const counts: Record<string, number> = {};
+      (att || []).forEach((a) => {
+        counts[a.person_id] = (counts[a.person_id] || 0) + 1;
+      });
+      return { weekCount: monthWeeks.length, personCounts: counts };
+    },
+    enabled: !!gdId,
+  });
+}
+
+export function WeeklySummary({ weeks, gdId }: Props) {
   const [idx, setIdx] = useState(weeks.length > 0 ? weeks.length - 1 : 0);
-
-  // Compute prev
   const prevWeek = idx > 0 ? weeks[idx - 1] : null;
-
-  // Current week attendance
   const week = weeks[idx];
-  const { data: currAttendance, isLoading } = useWeekAttendanceCounts(week?.id);
-  const { data: prevAttendance } = useWeekAttendanceCounts(prevWeek?.id);
-
-  const delta =
-    currAttendance && prevAttendance ? currAttendance.total - prevAttendance.total : null;
-
-  // Per-person stats in selected month
+  const { data: curr, isLoading } = useWeekAttendance(week?.id);
+  const { data: prev } = useWeekAttendance(prevWeek?.id);
+  const delta = curr && prev ? curr.total - prev.total : null;
   const mKey = week ? monthKey(week.date) : "2026-08";
-  const weeksInMonth = weeks.filter((w) => monthKey(w.date) === mKey);
-  const personRows = useMemo(
-    () =>
-      [...people]
-        .sort(
-          (a, b) => CAT_ORDER[a.category] - CAT_ORDER[b.category] || a.name.localeCompare(b.name),
-        )
-        .map((p) => {
-          // We'd need per-person present count — placeholder for now
-          return { ...p, present: 0, totalWeeks: weeksInMonth.length };
-        }),
-    [people, weeksInMonth.length],
-  );
+  const { data: monthData } = useMonthAttendance(gdId, mKey);
 
-  if (!week) {
+  if (!week)
     return (
-      <div className="flex flex-col items-center justify-center px-6 py-10 text-center">
-        <div className="mb-2 h-8 w-8 animate-spin rounded-full border-[2.5px] border-primary border-t-transparent" />
-        <div className="font-body text-sm text-ink-faint">Carregando...</div>
+      <div className="flex flex-1 items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-[2.5px] border-primary border-t-transparent" />
       </div>
     );
-  }
 
   return (
     <div className="px-5 pt-4 pb-6">
-      {/* Week navigation */}
       <div className="mb-[18px] flex items-center justify-between">
         <IconButton onClick={() => setIdx((i) => Math.max(0, i - 1))} label="Semana anterior">
           <ChevronLeft size={20} color={idx === 0 ? "#9A9A8A" : "#232A21"} />
@@ -102,14 +119,13 @@ export function WeeklySummary({ weeks, people }: Props) {
         </IconButton>
       </div>
 
-      {/* Total card */}
       <div className="mb-[14px] rounded-2xl bg-primary px-5 py-[18px] text-white">
         <div className="font-body text-[11.5px] font-bold opacity-80 uppercase tracking-[0.5px]">
           Total de presentes
         </div>
         <div className="mt-0.5 flex items-baseline gap-[10px]">
           <div className="font-mono text-4xl font-bold">
-            {isLoading ? "—" : (currAttendance?.total ?? "—")}
+            {isLoading ? "—" : (curr?.total ?? "—")}
           </div>
           {delta !== null && (
             <span className="flex items-center gap-[3px] font-body text-[12.5px] font-bold opacity-90">
@@ -126,7 +142,6 @@ export function WeeklySummary({ weeks, people }: Props) {
         </div>
       </div>
 
-      {/* Category breakdown */}
       <div className="mb-5 flex gap-[10px]">
         {(["visitor", "attender", "member"] as Category[]).map((cat) => (
           <div
@@ -144,43 +159,49 @@ export function WeeklySummary({ weeks, people }: Props) {
               className="mt-0.5 font-mono text-lg font-bold"
               style={{ color: categoryColors[cat].color }}
             >
-              {isLoading ? "—" : (currAttendance?.byCat[cat] ?? "—")}
+              {isLoading ? "—" : (curr?.byCat[cat] ?? "—")}
             </div>
           </div>
         ))}
       </div>
 
-      {/* Per-person frequency */}
-      <SectionLabel hint={`Presencas em ${monthLabel(mKey)}`}>Frequencia por pessoa</SectionLabel>
-      <div>
-        {personRows.map((p) => (
+      <SectionLabel>Presentes nesta semana</SectionLabel>
+      {curr?.attendees.map((a) => {
+        const monthCount = monthData?.personCounts[a.personId] ?? 0;
+        const totalWeeks = monthData?.weekCount ?? 1;
+        return (
           <div
-            key={p.id}
+            key={a.personId}
             className="flex items-center justify-between border-b border-line-soft py-[9px]"
           >
             <div className="flex items-center gap-[9px]">
               <Avatar
-                name={p.name}
-                color={categoryColors[p.category].color}
-                bg={categoryColors[p.category].bg}
+                name={a.name}
+                color={categoryColors[a.categoryAtTime].color}
+                bg={categoryColors[a.categoryAtTime].bg}
                 size={28}
               />
               <div>
-                <div className="font-body text-[13.5px] font-semibold text-ink">{p.name}</div>
+                <div className="font-body text-[13.5px] font-semibold text-ink">{a.name}</div>
                 <div
                   className="font-body text-[11px] font-bold"
-                  style={{ color: categoryColors[p.category].color }}
+                  style={{ color: categoryColors[a.categoryAtTime].color }}
                 >
-                  {categoryColors[p.category].label}
+                  {categoryColors[a.categoryAtTime].label}
                 </div>
               </div>
             </div>
             <div className="font-mono text-[13px] font-bold text-ink">
-              {p.present}/{p.totalWeeks || 1}
+              {monthCount}/{totalWeeks}
             </div>
           </div>
-        ))}
-      </div>
+        );
+      })}
+      {(!curr || curr.attendees.length === 0) && (
+        <div className="py-3 text-center font-body text-[13px] text-ink-faint">
+          Nenhum presente registrado.
+        </div>
+      )}
     </div>
   );
 }

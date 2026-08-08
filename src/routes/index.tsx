@@ -8,6 +8,7 @@ import {
   GdManagementPage,
   ReportsPage,
   GdDetailPage,
+  PeoplePage,
 } from "@/pages";
 import { ProtectedRoute } from "./ProtectedRoute";
 
@@ -24,6 +25,15 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["leader", "supervisor", "pastor"]}>
             <HomePage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/gd/:gdId/people"
+        element={
+          <ProtectedRoute allowedRoles={["leader", "supervisor", "pastor"]}>
+            <PeoplePage />
           </ProtectedRoute>
         }
       />
