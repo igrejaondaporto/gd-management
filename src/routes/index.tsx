@@ -11,7 +11,7 @@ import {
   ReportsPage,
   GdDetailPage,
 } from "@/pages";
-import { ProtectedRoute } from "./ProtectedRoute";
+import { ProtectedRoute, GdBoundary } from "./ProtectedRoute";
 
 export default function AppRoutes() {
   return (
@@ -33,7 +33,9 @@ export default function AppRoutes() {
         path="/register"
         element={
           <ProtectedRoute allowedRoles={["leader"]}>
-            <AttendanceFlowPage />
+            <GdBoundary>
+              <AttendanceFlowPage />
+            </GdBoundary>
           </ProtectedRoute>
         }
       />
