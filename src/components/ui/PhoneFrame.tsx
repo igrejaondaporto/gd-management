@@ -46,7 +46,7 @@ export function PhoneFrame({
 
         <div className="min-w-0 flex-1">
           <div className="truncate text-[10.5px] font-bold text-ink-faint tracking-[0.3px]">
-            PRESENCA GD
+            PRESENÇA GD
           </div>
           <div className="mt-[-1px] truncate text-[12.5px] font-bold text-ink">{title}</div>
         </div>

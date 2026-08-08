@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Plus, ChevronDown, ChevronUp, X } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
-import { ROLE_LABELS } from "@/lib/constants";
+import { ROLE_LABELS, ROLE_LABELS_PLURAL } from "@/lib/constants";
 import { useApprovedProfiles } from "@/hooks/useProfiles";
 import type { GdWithStaff } from "@/hooks/useGds";
 import type { UseMutationResult } from "@tanstack/react-query";
@@ -73,7 +73,7 @@ export function StaffSection({ gd, linkStaff, unlinkStaff }: StaffSectionProps) 
               grouped[role].length > 0 && (
                 <div key={role} className="mb-2">
                   <div className="mb-1 font-body text-[10.5px] font-bold text-ink-faint uppercase">
-                    {ROLE_LABELS[role]}s ({grouped[role].length})
+                    {ROLE_LABELS_PLURAL[role]} ({grouped[role].length})
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {grouped[role].map((s) => (
@@ -104,6 +104,9 @@ export function StaffSection({ gd, linkStaff, unlinkStaff }: StaffSectionProps) 
                   >
                     <Plus size={11} />
                     {p.fullName || p.email}
+                    {p.status === "pending" && (
+                      <span className="text-[10px] text-gold">(pendente)</span>
+                    )}
                     {p.role && (
                       <span className="text-[10px] text-ink-faint">({ROLE_LABELS[p.role]})</span>
                     )}

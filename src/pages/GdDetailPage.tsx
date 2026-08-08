@@ -69,13 +69,10 @@ export default function GdDetailPage() {
             ) : (
               <LeaderHome
                 gdId={gdId!}
-                gdName={gd?.name || "GD"}
-                leaderName={
-                  gd?.staff
-                    .filter((s) => s.profileRole === "leader")
-                    .map((s) => s.profileName)
-                    .join(" e ") || "Lider"
-                }
+                staff={(gd?.staff || []).map((s) => ({
+                  name: s.profileName || "?",
+                  role: s.profileRole || null,
+                }))}
                 people={people}
                 weeks={weeks}
                 onStartFlow={() => setView("register")}

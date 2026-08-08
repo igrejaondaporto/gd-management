@@ -45,7 +45,7 @@ export default function GdManagementPage() {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-paper sm:items-center sm:justify-center sm:p-6">
-      <PhoneFrame title="GDs" onBack={() => navigate(-1)} rightSlot={<AdminDrawer />}>
+      <PhoneFrame title="Gerir GD's" onBack={() => navigate(-1)} rightSlot={<AdminDrawer />}>
         <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden px-5 pt-4 pb-4">
           <div className="mb-4 font-display text-lg font-bold text-ink">Grupos de Discipulos</div>
 
@@ -63,26 +63,28 @@ export default function GdManagementPage() {
             <div key={gd.id} className="mb-2 rounded-xl border border-line bg-card p-3">
               <div className="flex items-center gap-2">
                 {editingId === gd.id ? (
-                  <div className="flex flex-1 items-center gap-2">
+                  <div className="w-full">
                     <input
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && handleSave()}
-                      className="flex-1 rounded-lg border-[1.5px] border-primary bg-card px-2 py-1.5 font-body text-[13px] font-semibold text-ink outline-none"
+                      className="mb-2 w-full rounded-lg border-[1.5px] border-primary bg-card px-2 py-1.5 font-body text-[13px] font-semibold text-ink outline-none"
                       autoFocus
                     />
-                    <button
-                      onClick={handleSave}
-                      className="cursor-pointer rounded-lg border-none bg-primary px-2.5 py-1.5 font-body text-[11px] font-bold text-white"
-                    >
-                      Salvar
-                    </button>
-                    <button
-                      onClick={() => setEditingId(null)}
-                      className="cursor-pointer rounded-lg border-none bg-paper-alt px-2.5 py-1.5 font-body text-[11px] font-bold text-ink-faint"
-                    >
-                      Cancelar
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleSave}
+                        className="flex-1 cursor-pointer rounded-lg border-none bg-primary px-2.5 py-1.5 font-body text-[11px] font-bold text-white"
+                      >
+                        Salvar
+                      </button>
+                      <button
+                        onClick={() => setEditingId(null)}
+                        className="flex-1 cursor-pointer rounded-lg border border-line bg-card px-2.5 py-1.5 font-body text-[11px] font-bold text-ink-faint"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <>

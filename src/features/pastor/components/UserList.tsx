@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, X, UserCheck, UserX } from "lucide-react";
+import { X, UserCheck, UserX, Save } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { ROLE_LABELS } from "@/lib/constants";
 import type { Role, Profile, ProfileStatus } from "@/types";
@@ -26,13 +26,20 @@ interface UserListProps {
   isLoading: boolean;
   approveUser: UseMutationResult<void, Error, { id: string; role: Role }>;
   rejectUser: UseMutationResult<void, Error, string>;
+  updateRole: UseMutationResult<void, Error, { id: string; role: Role }>;
 }
 
 function tabCount(profiles: Profile[], key: ProfileStatus): number {
   return profiles.filter((p) => p.status === key).length;
 }
 
-export function UserList({ profiles, isLoading, approveUser, rejectUser }: UserListProps) {
+export function UserList({
+  profiles,
+  isLoading,
+  approveUser,
+  rejectUser,
+  updateRole,
+}: UserListProps) {
   const [tab, setTab] = useState<ProfileStatus>("pending");
   const [selectedRoles, setSelectedRoles] = useState<Record<string, Role>>({});
 
@@ -104,16 +111,14 @@ export function UserList({ profiles, isLoading, approveUser, rejectUser }: UserL
                 </div>
               </div>
 
-              {/* Status icon for approved/rejected */}
-              {tab === "approved" && <Check size={16} className="shrink-0 text-primary" />}
               {tab === "rejected" && <X size={16} className="shrink-0 text-rose" />}
             </div>
 
-            {/* Bottom row: actions for pending */}
-            {tab === "pending" && (
+            {/* Bottom row: role edit for approved */}
+            {tab === "approved" && (
               <div className="mt-2.5 flex items-center gap-2 border-t border-line-soft pt-2.5">
                 <select
-                  value={selectedRoles[p.id] || "leader"}
+                  value={selectedRoles[p.id] || p.role || "leader"}
                   onChange={(e) =>
                     setSelectedRoles((prev) => ({
                       ...prev,
@@ -130,8 +135,36 @@ export function UserList({ profiles, isLoading, approveUser, rejectUser }: UserL
                 </select>
                 <button
                   onClick={() =>
-                    approveUser.mutate({ id: p.id, role: selectedRoles[p.id] || "leader" })
+                    updateRole.mutate({ id: p.id, role: selectedRoles[p.id] || p.role || "leader" })
                   }
+                  disabled={updateRole.isPending}
+                  className="flex cursor-pointer items-center gap-1 rounded-lg border-none bg-primary px-3 py-1.5 font-body text-[11.5px] font-bold text-white disabled:opacity-50"
+                >
+                  <Save size={13} />
+                  Salvar
+                </button>
+              </div>
+            )}
+
+            {/* Bottom row: approve/reject for pending */}
+            {tab === "pending" && (
+              <div className="mt-2.5 flex items-center gap-2 border-t border-line-soft pt-2.5">
+                <select
+                  value={p.role || "leader"}
+                  onChange={(e) => {
+                    const role = e.target.value as Role;
+                    updateRole.mutate({ id: p.id, role });
+                  }}
+                  className="min-w-0 flex-1 cursor-pointer rounded-lg border border-line bg-card px-2 py-1.5 font-body text-[11.5px] font-semibold text-ink outline-none"
+                >
+                  {ROLE_OPTIONS.map((r) => (
+                    <option key={r.value} value={r.value}>
+                      {r.label}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => approveUser.mutate({ id: p.id, role: p.role || "leader" })}
                   disabled={approveUser.isPending}
                   className="flex cursor-pointer items-center gap-1 rounded-lg border-none bg-primary px-3 py-1.5 font-body text-[11.5px] font-bold text-white disabled:opacity-50"
                 >

@@ -4,6 +4,7 @@ export {
   useApprovedProfiles,
   useApproveUser,
   useRejectUser,
+  useUpdateUserRole,
 } from "./useProfiles";
 export {
   useGds,

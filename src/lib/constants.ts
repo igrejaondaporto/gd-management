@@ -36,6 +36,12 @@ export const ROLE_LABELS: Record<string, string> = {
   pastor: "Pastor",
 };
 
+export const ROLE_LABELS_PLURAL: Record<string, string> = {
+  leader: "Líderes",
+  supervisor: "Supervisores",
+  pastor: "Pastores",
+};
+
 export const MONTHS_PT = [
   "jan",
   "fev",

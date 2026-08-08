@@ -2,7 +2,12 @@ import { useNavigate } from "react-router-dom";
 import { PhoneFrame } from "@/components/ui/PhoneFrame";
 import { AdminDrawer } from "@/features/auth";
 import { UserList } from "@/features/pastor";
-import { useProfilesByStatus, useApproveUser, useRejectUser } from "@/hooks/useProfiles";
+import {
+  useProfilesByStatus,
+  useApproveUser,
+  useRejectUser,
+  useUpdateUserRole,
+} from "@/hooks/useProfiles";
 import { useMemo } from "react";
 
 export default function UserManagementPage() {
@@ -13,6 +18,7 @@ export default function UserManagementPage() {
   const rejected = useProfilesByStatus("rejected");
   const approveUser = useApproveUser();
   const rejectUser = useRejectUser();
+  const updateRole = useUpdateUserRole();
 
   const allProfiles = useMemo(
     () => [...(pending.data || []), ...(approved.data || []), ...(rejected.data || [])],
@@ -31,6 +37,7 @@ export default function UserManagementPage() {
             isLoading={isLoading}
             approveUser={approveUser}
             rejectUser={rejectUser}
+            updateRole={updateRole}
           />
         </div>
       </PhoneFrame>

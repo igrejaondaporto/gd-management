@@ -37,7 +37,7 @@ export function useApprovedProfiles() {
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
-        .eq("status", "approved")
+        .in("status", ["approved", "pending"])
         .order("full_name");
 
       if (error) throw error;
@@ -65,6 +65,17 @@ export function useRejectUser() {
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("profiles").update({ status: "rejected" }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["profiles"] }),
+  });
+}
+
+export function useUpdateUserRole() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, role }: { id: string; role: Role }) => {
+      const { error } = await supabase.from("profiles").update({ role }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["profiles"] }),

@@ -7,10 +7,14 @@ import { supabase } from "@/lib/supabaseClient";
 import { MONTHS_PT, colors } from "@/lib/constants";
 import type { Person, Week } from "@/types";
 
+interface StaffMember {
+  name: string;
+  role: string | null;
+}
+
 interface LeaderHomeProps {
   gdId: string;
-  gdName: string;
-  leaderName: string;
+  staff: StaffMember[];
   people: Person[];
   weeks: Week[];
   onStartFlow: () => void;
@@ -63,8 +67,7 @@ function useMonthStats(gdId: string | undefined, mKey: string) {
 
 export function LeaderHome({
   gdId,
-  gdName,
-  leaderName,
+  staff,
   people,
   weeks,
   onStartFlow,
@@ -73,6 +76,9 @@ export function LeaderHome({
 }: LeaderHomeProps) {
   const navigate = useNavigate();
   const lastWeek = weeks.length > 0 ? weeks[0] : null;
+
+  const supervisors = staff.filter((s) => s.role === "supervisor").map((s) => s.name);
+  const leaders = staff.filter((s) => s.role === "leader").map((s) => s.name);
   const currentMonthKey = lastWeek ? monthKey(lastWeek.date) : "2026-08";
   const newMembers = people.filter(
     (p) => p.category === "member" && p.memberSince && monthKey(p.memberSince) === currentMonthKey,
@@ -84,10 +90,26 @@ export function LeaderHome({
 
   return (
     <div className="px-5 pt-[18px] pb-6">
-      <div className="font-body text-[12.5px] font-bold text-ink-faint uppercase tracking-[0.5px]">
-        {leaderName}
-      </div>
-      <div className="mt-0.5 mb-[18px] font-display text-2xl font-bold text-ink">{gdName}</div>
+      {staff.length > 0 && (
+        <div className="mb-4 space-y-0.5">
+          {supervisors.length > 0 && (
+            <div className="font-body text-[12.5px] text-ink-faint">
+              <span className="font-semibold text-ink-soft">
+                Supervisor{supervisors.length > 1 ? "es" : ""}:
+              </span>{" "}
+              {supervisors.join(", ")}
+            </div>
+          )}
+          {leaders.length > 0 && (
+            <div className="font-body text-[12.5px] text-ink-faint">
+              <span className="font-semibold text-ink-soft">
+                Líder{leaders.length > 1 ? "es" : ""}:
+              </span>{" "}
+              {leaders.join(", ")}
+            </div>
+          )}
+        </div>
+      )}
 
       {!readOnly && (
         <button

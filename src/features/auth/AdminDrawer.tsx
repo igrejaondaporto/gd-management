@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Settings, X, Users, Church, BarChart3 } from "lucide-react";
+import { Settings, X, Users, Church } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 
 const ADMIN_LINKS = [
-  { path: "/pastor/users", label: "Usuarios", icon: <Users size={18} /> },
-  { path: "/pastor/gds", label: "GDs", icon: <Church size={18} /> },
-  { path: "/reports", label: "Relatorios", icon: <BarChart3 size={18} /> },
+  { path: "/pastor/users", label: "Gerir usuarios", icon: <Users size={18} /> },
+  { path: "/pastor/gds", label: "Gerir GDs", icon: <Church size={18} /> },
 ];
 
 export function AdminDrawer() {
@@ -51,7 +50,7 @@ export function AdminDrawer() {
         className={`fixed top-0 right-0 z-50 h-full w-64 bg-card shadow-lg transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"}`}
       >
         <div className="flex items-center justify-between border-b border-line-soft px-4 py-4">
-          <div className="font-display text-base font-bold text-ink">Admin</div>
+          <div className="font-display text-base font-bold text-ink">Menu</div>
           <button
             onClick={() => setOpen(false)}
             className="cursor-pointer rounded-lg border-none bg-transparent p-1.5 text-ink-faint"
