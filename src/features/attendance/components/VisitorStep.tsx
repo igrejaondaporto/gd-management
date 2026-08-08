@@ -15,7 +15,7 @@ export function VisitorStep({ names, onAdd, onRemove }: VisitorStepProps) {
         Quem visitou o GD hoje?
       </div>
       <div className="mb-[18px] font-body text-[13.5px] text-ink-soft">
-        Adicione uma pessoa por vez. Se ninguem veio pela primeira vez, e so seguir em frente.
+        Adicione uma pessoa por vez. Se ninguém veio pela primeira vez, é só seguir em frente.
       </div>
       <NameInput placeholder="Nome do visitante" onAdd={onAdd} />
       {names.length > 0 && (

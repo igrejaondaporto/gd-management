@@ -11,8 +11,18 @@ interface SuccessStepProps {
 }
 
 export function SuccessStep({ total, delta, gdName, nextLabel, onExit }: SuccessStepProps) {
-  const deltaColor = delta !== null && delta >= 0 ? colors.primary : colors.gold;
-  const deltaText = delta === null ? "—" : (delta > 0 ? "+" : "") + String(delta);
+  const deltaColor =
+    delta === null
+      ? colors.inkFaint
+      : delta > 0
+        ? "#2D8A4E"
+        : delta < 0
+          ? colors.gold
+          : colors.inkFaint;
+  const deltaText =
+    delta === null ? "—" : delta > 0 ? `+${delta}` : delta < 0 ? String(delta) : "0";
+  const deltaLabel =
+    delta === null ? "Variacao" : delta > 0 ? "A mais" : delta < 0 ? "A menos" : "Igual";
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-8 text-center">
@@ -25,7 +35,7 @@ export function SuccessStep({ total, delta, gdName, nextLabel, onExit }: Success
       </div>
       <div className="mb-[22px] flex gap-[10px]">
         <MiniStat label="Presentes" value={total} color={colors.primary} />
-        <MiniStat label="Variacao" value={deltaText} color={deltaColor} />
+        <MiniStat label={deltaLabel} value={deltaText} color={deltaColor} />
       </div>
       <button
         onClick={onExit}

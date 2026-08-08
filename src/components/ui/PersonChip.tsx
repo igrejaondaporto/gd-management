@@ -9,6 +9,8 @@ interface PersonChipProps {
   bg: string;
   tag?: string;
   dashed?: boolean;
+  selectedColor?: string;
+  selectedBg?: string;
 }
 
 export function PersonChip({
@@ -19,6 +21,8 @@ export function PersonChip({
   bg,
   tag,
   dashed = false,
+  selectedColor,
+  selectedBg,
 }: PersonChipProps) {
   return (
     <button
@@ -26,21 +30,24 @@ export function PersonChip({
       className="relative flex cursor-pointer items-center gap-2 rounded-full py-[7px] pr-3 pl-[7px] transition-all duration-150"
       style={{
         border: selected
-          ? `1.5px solid ${color}`
+          ? `1.5px solid ${selectedColor || color}`
           : dashed
-            ? `1.5px dashed var(--color-line, #DFD8C0)`
-            : `1.5px solid var(--color-line, #DFD8C0)`,
-        background: selected ? bg : "#FFFFFF",
+            ? `1.5px dashed ${color}`
+            : `1.5px solid ${color}`,
+        background: selected ? selectedBg || bg : "#FFFFFF",
       }}
     >
-      <Avatar name={name} color={color} bg={bg} size={28} />
-      <span className="font-body text-[13.5px] font-semibold text-ink">
-        {name}
-      </span>
+      <Avatar
+        name={name}
+        color={selected ? selectedColor || color : color}
+        bg={selected ? selectedBg || bg : bg}
+        size={28}
+      />
+      <span className="font-body text-[13.5px] font-semibold text-ink">{name}</span>
       {tag && (
         <span
           className="ml-0.5 font-body text-[10.5px] font-bold"
-          style={{ color }}
+          style={{ color: selectedColor || color }}
         >
           {tag}
         </span>

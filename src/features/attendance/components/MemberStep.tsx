@@ -33,8 +33,8 @@ export function MemberStep({
       <div className="mb-1 font-display text-[21px] font-bold text-ink">
         Quem esteve entre os membros?
       </div>
-      <div className="mb-[18px] font-body text-[13.5px] text-ink-soft">
-        Toque para marcar presenca. Um frequentador pode se tornar membro aqui.
+      <div className="mb-[18px] font-body text-[12.5px] text-ink-faint">
+        Toque para marcar presença.
       </div>
 
       {members.length > 0 && (
@@ -57,7 +57,7 @@ export function MemberStep({
 
       {attenders.length > 0 && (
         <div className="mb-[18px]">
-          <SectionLabel hint="Toque para tornar essa pessoa membro do GD">
+          <SectionLabel hint="Estes são frequentadores do GD. Incentive-os a realizar o processo de membresia; caso tenham feito, promova-os a membro.">
             Promover a membro
           </SectionLabel>
           <div className="flex flex-wrap gap-2">
@@ -65,11 +65,12 @@ export function MemberStep({
               <PersonChip
                 key={p.id}
                 name={p.name}
-                color={categoryColors.member.color}
-                bg={categoryColors.member.bg}
-                dashed={!upgradeIds.has(p.id)}
-                tag={upgradeIds.has(p.id) ? "novo membro" : undefined}
+                color={categoryColors.attender.color}
+                bg={categoryColors.attender.bg}
                 selected={upgradeIds.has(p.id)}
+                selectedColor={categoryColors.member.color}
+                selectedBg={categoryColors.member.bg}
+                tag={upgradeIds.has(p.id) ? "novo membro" : undefined}
                 onClick={() => onToggleUpgrade(p.id)}
               />
             ))}

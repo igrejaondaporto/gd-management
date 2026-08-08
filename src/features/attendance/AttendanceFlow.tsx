@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
-import { ChevronLeft, X } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Check, CheckCircle, Undo2, X } from "lucide-react";
 import { IconButton } from "@/components/ui/IconButton";
 import { VisitorStep } from "./components/VisitorStep";
 import { AttenderStep } from "./components/AttenderStep";
@@ -7,12 +8,13 @@ import { MemberStep } from "./components/MemberStep";
 import { ReviewStep, type ReviewGroup } from "./components/ReviewStep";
 import { SuccessStep } from "./components/SuccessStep";
 import { useCreateWeek } from "@/hooks/useWeeks";
+import { supabase } from "@/lib/supabaseClient";
 import { addDays, formatWeekLabel } from "@/lib/utils";
 import type { Person, Category, Week } from "@/types";
 
 const STEPS = ["Visitantes", "Frequentadores", "Membros", "Revisao"];
 
-const STEP_COLORS = ["#AF5D64", "#A9822C", "#266BC6", "#232A21"];
+const STEP_COLORS = ["#AF5D64", "#A9822C", "#266BC6", "#2D8A4E"];
 
 interface AttendanceFlowProps {
   gdId: string;
@@ -68,32 +70,50 @@ export function AttendanceFlow({ gdId, gdName, people, weeks, onExit }: Attendan
     upgradeAttenderIds.size +
     manualMemberNames.length;
 
-  const delta: number | null = null; // accurate delta requires attendance query — Phase 6
+  // Query previous week's attendance count to compute delta
+  const { data: previousWeekCount } = useQuery({
+    queryKey: ["previousWeekCount", gdId, lastWeek?.id],
+    queryFn: async () => {
+      if (!lastWeek?.id) return null;
+      const { count, error } = await supabase
+        .from("attendance")
+        .select("*", { count: "exact", head: true })
+        .eq("week_id", lastWeek.id);
+      if (error) throw error;
+      return count ?? 0;
+    },
+    enabled: !!lastWeek?.id,
+  });
+
+  const delta: number | null =
+    previousWeekCount !== null && previousWeekCount !== undefined
+      ? totalPresent - previousWeekCount
+      : null;
 
   // Build review groups
   const reviewGroups: ReviewGroup[] = useMemo(
     () => [
-      { names: visitorNames, category: "visitor" as Category },
+      { entries: visitorNames.map((n) => ({ name: n })), category: "visitor" as Category },
       {
-        names: attenders.filter((p) => selectedAttenderIds.has(p.id)).map((p) => p.name),
+        entries: [
+          ...attenders.filter((p) => selectedAttenderIds.has(p.id)).map((p) => ({ name: p.name })),
+          ...visitors
+            .filter((p) => upgradeVisitorIds.has(p.id))
+            .map((p) => ({ name: p.name, tag: "novo" as const })),
+          ...manualAttenderNames.map((n) => ({ name: n, tag: "novo" as const })),
+        ],
         category: "attender" as Category,
       },
       {
-        names: visitors.filter((p) => upgradeVisitorIds.has(p.id)).map((p) => p.name),
-        category: "attender" as Category,
-        tag: "novo",
-      },
-      { names: manualAttenderNames, category: "attender" as Category, tag: "novo" },
-      {
-        names: members.filter((p) => selectedMemberIds.has(p.id)).map((p) => p.name),
+        entries: [
+          ...members.filter((p) => selectedMemberIds.has(p.id)).map((p) => ({ name: p.name })),
+          ...attenders
+            .filter((p) => upgradeAttenderIds.has(p.id))
+            .map((p) => ({ name: p.name, tag: "novo membro" as const })),
+          ...manualMemberNames.map((n) => ({ name: n, tag: "novo" as const })),
+        ],
         category: "member" as Category,
       },
-      {
-        names: attenders.filter((p) => upgradeAttenderIds.has(p.id)).map((p) => p.name),
-        category: "member" as Category,
-        tag: "novo membro",
-      },
-      { names: manualMemberNames, category: "member" as Category, tag: "novo" },
     ],
     [
       visitorNames,
@@ -172,21 +192,20 @@ export function AttendanceFlow({ gdId, gdName, people, weeks, onExit }: Attendan
       {/* Header */}
       <div className="px-5 pt-4 pb-3">
         <div className="mb-3 flex items-center justify-between">
-          {/* Back button — only from step 2 (Membros) onwards */}
-          {step >= 2 ? (
+          {/* Back button — from step 1 onwards */}
+          {step >= 1 ? (
             <IconButton onClick={() => setStep((s) => s - 1)} label="Voltar">
-              <ChevronLeft size={20} />
+              <Undo2 size={16} />
             </IconButton>
           ) : (
             <div className="w-[36px]" />
           )}
           <div className="text-center">
-            <div className="font-body text-xs font-bold text-ink-faint">Passo {step + 1} de 4</div>
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="mt-1 cursor-pointer rounded-lg border border-line bg-transparent px-2 py-1 text-center font-mono text-[12px] font-bold text-ink outline-none"
+              className="cursor-pointer rounded-lg border border-line bg-transparent px-2 py-1 text-center font-mono text-[12px] font-bold text-ink outline-none"
             />
           </div>
           <IconButton onClick={onExit} label="Fechar">
@@ -194,15 +213,22 @@ export function AttendanceFlow({ gdId, gdName, people, weeks, onExit }: Attendan
           </IconButton>
         </div>
         {/* Progress bar */}
-        <div className="flex gap-1">
-          {STEPS.map((s, i) => (
-            <div
-              key={s}
-              className="h-1 flex-1 rounded-sm transition-colors duration-200"
-              style={{ background: i <= step ? stepColor : "#EAE4D0" }}
-            />
-          ))}
-        </div>
+        {step === 3 ? (
+          <div className="flex items-center gap-1.5">
+            <div className="h-1.5 flex-1 rounded-sm bg-primary" />
+            <Check size={14} className="shrink-0 text-primary" strokeWidth={3} />
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5">
+            {STEPS.map((s, i) => (
+              <div
+                key={s}
+                className="h-1.5 flex-1 rounded-sm transition-colors duration-200"
+                style={{ background: i <= step ? stepColor : "#EAE4D0" }}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Body */}
@@ -259,9 +285,16 @@ export function AttendanceFlow({ gdId, gdName, people, weeks, onExit }: Attendan
           <button
             onClick={handleConfirm}
             disabled={createWeek.isPending}
-            className="w-full cursor-pointer rounded-xl border-none bg-primary px-[13px] py-3 font-body text-[14.5px] font-bold text-white disabled:opacity-60"
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border-none bg-primary px-[13px] py-3 font-body text-[14.5px] font-bold text-white disabled:opacity-60"
           >
-            {createWeek.isPending ? "Salvando..." : "Confirmar presenca da semana"}
+            {createWeek.isPending ? (
+              "Salvando..."
+            ) : (
+              <>
+                <CheckCircle size={20} />
+                Confirmar presença
+              </>
+            )}
           </button>
         )}
       </div>

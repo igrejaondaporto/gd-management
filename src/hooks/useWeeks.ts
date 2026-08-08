@@ -49,13 +49,29 @@ export function useCreateWeek() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (input: CreateWeekInput) => {
+      // Convert camelCase to snake_case for Postgres composite types
+      const newPeople = input.newPeople.map((p) => ({
+        name: p.name,
+        category: p.category,
+        member_since: p.memberSince ?? null,
+      }));
+      const promotions = input.promotions.map((p) => ({
+        person_id: p.personId,
+        new_category: p.newCategory,
+        member_since: p.memberSince ?? null,
+      }));
+      const attendance = input.attendance.map((a) => ({
+        person_id: a.personId,
+        category_at_time: a.categoryAtTime,
+      }));
+
       // Use the RPC function for atomicity
       const { error } = await supabase.rpc("confirm_week_attendance", {
         p_gd_id: input.gdId,
         p_date: input.date,
-        p_new_people: input.newPeople,
-        p_promotions: input.promotions,
-        p_attendance: input.attendance,
+        p_new_people: newPeople,
+        p_promotions: promotions,
+        p_attendance: attendance,
       });
 
       if (error) throw error;
