@@ -1,2 +1,2 @@
-// Pastor feature — user approval, GD management
-export {};
+export { UserList } from "./components/UserList";
+export { StaffSection } from "./components/StaffSection";
