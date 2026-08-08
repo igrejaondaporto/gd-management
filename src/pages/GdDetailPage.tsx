@@ -32,7 +32,7 @@ export default function GdDetailPage() {
           if (view !== "home") {
             setView("home");
           } else {
-            navigate("/");
+            navigate(-1);
           }
         }}
         rightSlot={<AdminDrawer />}
