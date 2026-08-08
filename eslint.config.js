@@ -30,6 +30,7 @@ const eslintConfig = [
     },
     rules: {
       ...tseslint.configs.recommended.rules,
+      "no-undef": "off", // TypeScript handles this
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],

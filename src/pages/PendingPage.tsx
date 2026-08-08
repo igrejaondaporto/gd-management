@@ -22,8 +22,8 @@ export default function PendingPage() {
           </div>
           <h2 className="font-display text-xl font-bold text-ink">Conta criada!</h2>
           <p className="mt-2 font-body text-sm text-ink-soft">
-            Seu cadastro esta aguardando aprovacao de um pastor. Voce recebera acesso assim que for
-            aprovado.
+            Seu cadastro esta aguardando aprovacao de um supervisor. Voce recebera acesso assim que
+            for aprovado.
           </p>
           <button
             onClick={handleLogout}
