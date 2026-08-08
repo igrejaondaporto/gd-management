@@ -57,6 +57,12 @@ export function AttendanceFlow({ gdId, gdName, people, weeks, onExit }: Attendan
   const [selectedDate, setSelectedDate] = useState(defaultDate);
   const nextLabel = formatWeekLabel(selectedDate);
 
+  // Format YYYY-MM-DD to DD/MM/YYYY for display
+  const displayDate = useMemo(() => {
+    const [y, m, d] = selectedDate.split("-");
+    return `${d}/${m}/${y}`;
+  }, [selectedDate]);
+
   const attenders = useMemo(() => people.filter((p) => p.category === "attender"), [people]);
   const members = useMemo(() => people.filter((p) => p.category === "member"), [people]);
   const visitors = useMemo(() => people.filter((p) => p.category === "visitor"), [people]);
@@ -201,11 +207,24 @@ export function AttendanceFlow({ gdId, gdName, people, weeks, onExit }: Attendan
             <div className="w-[36px]" />
           )}
           <div className="text-center">
+            <button
+              type="button"
+              onClick={() => {
+                const input = document.getElementById(
+                  "attendance-date-picker",
+                ) as HTMLInputElement | null;
+                input?.showPicker();
+              }}
+              className="cursor-pointer rounded-lg border border-line bg-transparent px-2 py-1 text-center font-mono text-[12px] font-bold text-ink outline-none"
+            >
+              {displayDate}
+            </button>
             <input
+              id="attendance-date-picker"
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="cursor-pointer rounded-lg border border-line bg-transparent px-2 py-1 text-center font-mono text-[12px] font-bold text-ink outline-none"
+              className="sr-only"
             />
           </div>
           <IconButton onClick={onExit} label="Fechar">
