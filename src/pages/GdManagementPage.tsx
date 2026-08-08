@@ -44,9 +44,9 @@ export default function GdManagementPage() {
   };
 
   return (
-    <div className="flex min-h-dvh flex-col bg-paper sm:items-center sm:justify-center sm:p-6">
-      <PhoneFrame title="GDs" onBack={() => navigate("/")} rightSlot={<AdminDrawer />}>
-        <div className="flex flex-1 flex-col overflow-y-auto px-5 pt-4 pb-4">
+    <div className="flex h-dvh flex-col overflow-hidden bg-paper sm:items-center sm:justify-center sm:p-6">
+      <PhoneFrame title="GDs" onBack={() => navigate(-1)} rightSlot={<AdminDrawer />}>
+        <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden px-5 pt-4 pb-4">
           <div className="mb-4 font-display text-lg font-bold text-ink">Grupos de Discipulos</div>
 
           <div className="mb-4">

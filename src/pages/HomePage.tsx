@@ -6,7 +6,6 @@ import { GdPicker } from "@/features/attendance/components/GdPicker";
 import { AdminDrawer } from "@/features/auth";
 import { useLeaderGd } from "@/hooks/useLeaderGd";
 import { useProfile } from "@/hooks/useProfile";
-import { ROLE_LABELS } from "@/lib/constants";
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -14,16 +13,26 @@ export default function HomePage() {
   const { data: profile } = useProfile();
 
   const isAdmin = profile?.role === "supervisor" || profile?.role === "pastor";
-  const roleLabel = profile?.role ? ROLE_LABELS[profile.role] : "";
 
   return (
-    <div className="flex min-h-dvh flex-col bg-paper sm:items-center sm:justify-center sm:p-6">
+    <div className="flex h-dvh flex-col overflow-hidden bg-paper sm:items-center sm:justify-center sm:p-6">
       <PhoneFrame
         title={isAdmin ? "Inicio" : "Grupos"}
-        badge={isAdmin ? { label: roleLabel, color: "#A9822C", bg: "#F1E2B8" } : undefined}
         rightSlot={<AdminDrawer />}
+        bottomSlot={
+          isAdmin ? (
+            <BottomNav
+              tabs={[
+                { key: "/", label: "Inicio", icon: <Home size={20} /> },
+                { key: "/reports", label: "Relatorios", icon: <BarChart3 size={20} /> },
+              ]}
+              active="/"
+              onChange={(key) => navigate(key)}
+            />
+          ) : undefined
+        }
       >
-        <div className="flex flex-1 flex-col overflow-y-auto">
+        <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
           {isLoading ? (
             <div className="flex flex-1 items-center justify-center">
               <div className="h-6 w-6 animate-spin rounded-full border-[2.5px] border-primary border-t-transparent" />
@@ -49,17 +58,6 @@ export default function HomePage() {
           )}
         </div>
       </PhoneFrame>
-
-      {isAdmin && (
-        <BottomNav
-          tabs={[
-            { key: "/", label: "Inicio", icon: <Home size={20} /> },
-            { key: "/reports", label: "Relatorios", icon: <BarChart3 size={20} /> },
-          ]}
-          active="/"
-          onChange={(key) => navigate(key)}
-        />
-      )}
     </div>
   );
 }

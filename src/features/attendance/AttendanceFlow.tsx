@@ -172,12 +172,14 @@ export function AttendanceFlow({ gdId, gdName, people, weeks, onExit }: Attendan
       {/* Header */}
       <div className="px-5 pt-4 pb-3">
         <div className="mb-3 flex items-center justify-between">
-          <IconButton
-            onClick={() => (step === 0 ? onExit() : setStep((s) => s - 1))}
-            label="Voltar"
-          >
-            <ChevronLeft size={20} />
-          </IconButton>
+          {/* Back button — only from step 2 (Membros) onwards */}
+          {step >= 2 ? (
+            <IconButton onClick={() => setStep((s) => s - 1)} label="Voltar">
+              <ChevronLeft size={20} />
+            </IconButton>
+          ) : (
+            <div className="w-[36px]" />
+          )}
           <div className="text-center">
             <div className="font-body text-xs font-bold text-ink-faint">Passo {step + 1} de 4</div>
             <input
@@ -204,7 +206,7 @@ export function AttendanceFlow({ gdId, gdName, people, weeks, onExit }: Attendan
       </div>
 
       {/* Body */}
-      <div className="flex-1 overflow-y-auto px-5 pt-2 pb-5">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 pt-2 pb-5">
         {step === 0 && (
           <VisitorStep
             names={visitorNames}

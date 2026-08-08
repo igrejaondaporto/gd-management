@@ -7,9 +7,8 @@ import { Avatar } from "@/components/ui/Avatar";
 import { AdminDrawer } from "@/features/auth";
 import { usePeople } from "@/hooks/usePeople";
 import { useAllGds } from "@/hooks/useAllGds";
-import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/lib/supabaseClient";
-import { categoryColors, ROLE_LABELS } from "@/lib/constants";
+import { categoryColors } from "@/lib/constants";
 import type { Person, Category } from "@/types";
 
 function useUpdatePerson(gdId: string) {
@@ -63,26 +62,26 @@ function PersonRow({
           autoFocus
           onKeyDown={(e) => e.key === "Enter" && save()}
         />
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value as Category)}
+          className="mb-2 w-full rounded-lg border border-line bg-card px-3 py-2 font-body text-[13px] font-semibold text-ink outline-none"
+        >
+          <option value="member">Membro</option>
+          <option value="attender">Frequentador</option>
+          <option value="visitor">Visitante</option>
+        </select>
         <div className="flex items-center gap-2">
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value as Category)}
-            className="flex-1 rounded-lg border border-line bg-card px-3 py-2 font-body text-[13px] font-semibold text-ink outline-none"
-          >
-            <option value="member">Membro</option>
-            <option value="attender">Frequentador</option>
-            <option value="visitor">Visitante</option>
-          </select>
           <button
             onClick={save}
             disabled={updatePerson.isPending}
-            className="cursor-pointer rounded-lg border-none bg-primary px-4 py-2 font-body text-[12px] font-bold text-white disabled:opacity-50"
+            className="flex-1 cursor-pointer rounded-lg border-none bg-primary px-3 py-2 font-body text-[12px] font-bold text-white disabled:opacity-50"
           >
             {updatePerson.isPending ? "Salvando..." : "Salvar"}
           </button>
           <button
             onClick={() => setEditing(false)}
-            className="cursor-pointer rounded-lg border-none bg-paper-alt px-4 py-2 font-body text-[12px] font-bold text-ink-faint"
+            className="flex-1 cursor-pointer rounded-lg border border-line bg-card px-3 py-2 font-body text-[12px] font-bold text-ink-faint"
           >
             Cancelar
           </button>
@@ -124,11 +123,9 @@ export default function PeoplePage() {
   const { gdId } = useParams<{ gdId: string }>();
   const navigate = useNavigate();
   const { data: allGds } = useAllGds();
-  const { data: profile } = useProfile();
   const { data: people = [], isLoading } = usePeople(gdId);
 
   const gd = allGds?.gds.find((g) => g.id === gdId);
-  const roleLabel = profile?.role ? ROLE_LABELS[profile.role] : "";
   const readOnly = false; // All roles (leader, supervisor, pastor) can edit
 
   const sorted = [...people].sort((a, b) => {
@@ -137,15 +134,14 @@ export default function PeoplePage() {
   });
 
   return (
-    <div className="flex min-h-dvh flex-col bg-paper sm:items-center sm:justify-center sm:p-6">
+    <div className="flex h-dvh flex-col overflow-hidden bg-paper sm:items-center sm:justify-center sm:p-6">
       <PhoneFrame
         title={gd?.name || "GD"}
         subtitle="Pessoas"
-        badge={roleLabel ? { label: roleLabel, color: "#A9822C", bg: "#F1E2B8" } : undefined}
         onBack={() => navigate(-1)}
         rightSlot={<AdminDrawer />}
       >
-        <div className="flex flex-1 flex-col overflow-y-auto px-5 pt-4 pb-6">
+        <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden px-5 pt-4 pb-6">
           <div className="mb-1 font-display text-[21px] font-bold text-ink">Pessoas do GD</div>
           <div className="mb-5 font-body text-[13.5px] text-ink-soft">
             {people.length} pessoa{people.length !== 1 ? "s" : ""} cadastrada

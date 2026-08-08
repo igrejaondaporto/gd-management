@@ -23,13 +23,14 @@ export function NameInput({ placeholder, onAdd }: NameInputProps) {
         onChange={(e) => setVal(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && commit()}
         placeholder={placeholder}
-        className="flex-1 rounded-[10px] border-[1.5px] border-line bg-card px-3 py-[10px] font-body text-sm text-ink outline-none"
+        className="min-w-0 flex-1 rounded-[10px] border-[1.5px] border-line bg-card px-3 py-[10px] font-body text-sm text-ink outline-none"
       />
       <button
         onClick={commit}
-        className="flex cursor-pointer items-center gap-1 rounded-[10px] border-none bg-primary px-[14px] font-body text-[13px] font-bold text-white"
+        className="flex shrink-0 cursor-pointer items-center gap-1 rounded-[10px] border-none bg-primary px-3 py-[10px] font-body text-[13px] font-bold text-white"
       >
-        <Plus size={15} /> Adicionar
+        <Plus size={15} />
+        <span className="hidden sm:inline">Adicionar</span>
       </button>
     </div>
   );

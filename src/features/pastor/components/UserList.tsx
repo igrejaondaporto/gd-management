@@ -28,6 +28,10 @@ interface UserListProps {
   rejectUser: UseMutationResult<void, Error, string>;
 }
 
+function tabCount(profiles: Profile[], key: ProfileStatus): number {
+  return profiles.filter((p) => p.status === key).length;
+}
+
 export function UserList({ profiles, isLoading, approveUser, rejectUser }: UserListProps) {
   const [tab, setTab] = useState<ProfileStatus>("pending");
   const [selectedRoles, setSelectedRoles] = useState<Record<string, Role>>({});
@@ -37,23 +41,22 @@ export function UserList({ profiles, isLoading, approveUser, rejectUser }: UserL
   return (
     <>
       {/* Tabs */}
-      <div className="mb-4 flex rounded-xl bg-paper-alt p-1">
+      <div className="mb-3 flex gap-1.5 rounded-xl bg-paper-alt p-1">
         {STATUS_TABS.map((t) => {
-          const count = profiles.filter((p) => p.status === t.key).length;
+          const count = tabCount(profiles, t.key);
+          const active = tab === t.key;
           return (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className="flex-1 cursor-pointer rounded-lg border-none px-3 py-2 font-body text-[12.5px] font-semibold transition-colors"
+              className="flex-1 cursor-pointer rounded-lg border-none px-2 py-1.5 font-body text-[11.5px] font-semibold transition-colors"
               style={{
-                background: tab === t.key ? "#fff" : "transparent",
-                color: tab === t.key ? "#232A21" : "#9A9A8A",
+                background: active ? "#fff" : "transparent",
+                color: active ? "#232A21" : "#9A9A8A",
               }}
             >
               {t.label}
-              {tab === t.key && (
-                <span className="ml-1.5 text-[11px] text-ink-faint">({count})</span>
-              )}
+              <span className={active ? "ml-1" : "text-[10px] text-ink-faint"}>({count})</span>
             </button>
           );
         })}
@@ -78,29 +81,37 @@ export function UserList({ profiles, isLoading, approveUser, rejectUser }: UserL
         filtered.map((p) => (
           <div
             key={p.id}
-            className="mb-2 flex items-center gap-3 rounded-xl border border-line bg-card p-3"
+            className="mb-2 overflow-hidden rounded-xl border border-line bg-card p-3"
           >
-            <Avatar
-              name={p.fullName || p.email}
-              color={p.role ? "#266BC6" : "#9A9A8A"}
-              bg={p.role ? "#DCE7F8" : "#EAE4D0"}
-              size={36}
-            />
-            <div className="min-w-0 flex-1">
-              <div className="truncate font-body text-[13px] font-semibold text-ink">
-                {p.fullName || "Sem nome"}
+            {/* Top row: avatar + info */}
+            <div className="flex items-center gap-3">
+              <Avatar
+                name={p.fullName || p.email}
+                color={p.role ? "#266BC6" : "#9A9A8A"}
+                bg={p.role ? "#DCE7F8" : "#EAE4D0"}
+                size={36}
+              />
+              <div className="min-w-0 flex-1">
+                <div className="truncate font-body text-[13px] font-semibold text-ink">
+                  {p.fullName || "Sem nome"}
+                </div>
+                <div className="truncate font-body text-[11.5px] text-ink-soft">{p.email}</div>
+                <div className="mt-0.5 font-body text-[10.5px] text-ink-faint">
+                  {formatDate(p.createdAt)}
+                  {p.role && (
+                    <span className="ml-2 font-semibold text-primary">{ROLE_LABELS[p.role]}</span>
+                  )}
+                </div>
               </div>
-              <div className="truncate font-body text-[11.5px] text-ink-soft">{p.email}</div>
-              <div className="mt-0.5 font-body text-[10.5px] text-ink-faint">
-                {formatDate(p.createdAt)}
-                {p.role && (
-                  <span className="ml-2 font-semibold text-primary">{ROLE_LABELS[p.role]}</span>
-                )}
-              </div>
+
+              {/* Status icon for approved/rejected */}
+              {tab === "approved" && <Check size={16} className="shrink-0 text-primary" />}
+              {tab === "rejected" && <X size={16} className="shrink-0 text-rose" />}
             </div>
 
+            {/* Bottom row: actions for pending */}
             {tab === "pending" && (
-              <div className="flex items-center gap-1.5">
+              <div className="mt-2.5 flex items-center gap-2 border-t border-line-soft pt-2.5">
                 <select
                   value={selectedRoles[p.id] || "leader"}
                   onChange={(e) =>
@@ -109,7 +120,7 @@ export function UserList({ profiles, isLoading, approveUser, rejectUser }: UserL
                       [p.id]: e.target.value as Role,
                     }))
                   }
-                  className="cursor-pointer rounded-lg border border-line bg-card px-2 py-1.5 font-body text-[11.5px] font-semibold text-ink outline-none"
+                  className="min-w-0 flex-1 cursor-pointer rounded-lg border border-line bg-card px-2 py-1.5 font-body text-[11.5px] font-semibold text-ink outline-none"
                 >
                   {ROLE_OPTIONS.map((r) => (
                     <option key={r.value} value={r.value}>
@@ -122,22 +133,21 @@ export function UserList({ profiles, isLoading, approveUser, rejectUser }: UserL
                     approveUser.mutate({ id: p.id, role: selectedRoles[p.id] || "leader" })
                   }
                   disabled={approveUser.isPending}
-                  className="flex cursor-pointer items-center gap-1 rounded-lg border-none bg-primary px-2.5 py-1.5 font-body text-[11.5px] font-bold text-white transition-opacity disabled:opacity-50"
+                  className="flex cursor-pointer items-center gap-1 rounded-lg border-none bg-primary px-3 py-1.5 font-body text-[11.5px] font-bold text-white disabled:opacity-50"
                 >
                   <UserCheck size={13} />
+                  Aprovar
                 </button>
                 <button
                   onClick={() => rejectUser.mutate(p.id)}
                   disabled={rejectUser.isPending}
-                  className="flex cursor-pointer items-center gap-1 rounded-lg border border-rose bg-card px-2.5 py-1.5 font-body text-[11.5px] font-bold text-rose transition-opacity disabled:opacity-50"
+                  className="flex cursor-pointer items-center gap-1 rounded-lg border border-rose bg-card px-3 py-1.5 font-body text-[11.5px] font-bold text-rose disabled:opacity-50"
                 >
                   <UserX size={13} />
+                  Rejeitar
                 </button>
               </div>
             )}
-
-            {tab === "approved" && <Check size={16} className="text-primary" />}
-            {tab === "rejected" && <X size={16} className="text-rose" />}
           </div>
         ))}
     </>

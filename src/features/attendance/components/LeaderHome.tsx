@@ -106,7 +106,7 @@ export function LeaderHome({
 
       <button
         onClick={onViewSummary}
-        className="mb-4 w-full cursor-pointer rounded-[14px] border border-line bg-card px-4 py-[14px] text-left"
+        className="mb-4 w-full cursor-pointer rounded-[14px] border border-primary/50 bg-card px-4 py-[14px] text-left active:bg-primary/10 sm:hover:bg-primary/5"
       >
         <div className="flex items-center justify-between">
           <div>
@@ -127,12 +127,11 @@ export function LeaderHome({
       </button>
 
       <div className="mb-5 flex gap-[10px]">
-        <button
+        <MiniStat
+          label="Pessoas no GD"
+          value={people.length}
           onClick={() => navigate(`/gd/${gdId}/people`)}
-          className="flex-1 cursor-pointer border-none bg-transparent p-0 text-left"
-        >
-          <MiniStat label="Pessoas no GD" value={people.length} />
-        </button>
+        />
         <MiniStat
           label={`Media em ${monthName}`}
           value={monthStats?.weekCount ? monthStats.avg : "—"}

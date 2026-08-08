@@ -1,29 +1,28 @@
 import { type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { Church, ChevronLeft } from "lucide-react";
-import { Pill } from "./Pill";
 
 interface PhoneFrameProps {
   children: ReactNode;
   title: string;
   subtitle?: string;
-  badge?: { label: string; color: string; bg: string };
   onBack?: () => void;
   rightSlot?: ReactNode;
+  bottomSlot?: ReactNode;
 }
 
 export function PhoneFrame({
   children,
   title,
   subtitle,
-  badge,
   onBack,
   rightSlot,
+  bottomSlot,
 }: PhoneFrameProps) {
   const navigate = useNavigate();
 
   return (
-    <div className="mx-auto flex w-full max-w-full min-h-dvh flex-col bg-paper sm:max-w-[430px] sm:min-h-[700px] sm:rounded-[26px] sm:border sm:border-line sm:shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+    <div className="mx-auto flex w-full max-w-full h-full flex-col bg-paper sm:h-auto sm:max-w-[430px] sm:min-h-[700px] sm:rounded-[26px] sm:border sm:border-line sm:shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       {/* Header bar */}
       <div className="flex items-center gap-2 px-4 pt-4 pb-2 sm:px-5 sm:pt-4">
         {/* Back button or home icon */}
@@ -56,17 +55,16 @@ export function PhoneFrame({
           <span className="shrink-0 text-[11px] font-semibold text-ink-soft">{subtitle}</span>
         )}
 
-        {badge && (
-          <Pill color={badge.color} bg={badge.bg}>
-            {badge.label}
-          </Pill>
-        )}
-
         {rightSlot}
       </div>
 
       {/* Content */}
-      <div className="flex flex-1 flex-col overflow-y-auto min-h-0">{children}</div>
+      <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden min-h-0">
+        {children}
+      </div>
+
+      {/* Bottom slot (e.g. BottomNav) */}
+      {bottomSlot}
     </div>
   );
 }
