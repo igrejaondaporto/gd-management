@@ -29,12 +29,22 @@ export default {
       },
       animation: {
         "stamp-pop": "stampPop 0.32s cubic-bezier(.2,1.4,.4,1) both",
+        "slide-up": "slideUp 0.25s ease-out both",
+        "fade-in": "fadeIn 0.2s ease-out both",
       },
       keyframes: {
         stampPop: {
           "0%": { transform: "scale(2.4) rotate(-14deg)", opacity: "0" },
           "55%": { transform: "scale(0.85) rotate(-10deg)", opacity: "1" },
           "100%": { transform: "scale(1) rotate(-8deg)", opacity: "1" },
+        },
+        slideUp: {
+          from: { transform: "translateY(100%)", opacity: "0" },
+          to: { transform: "translateY(0)", opacity: "1" },
+        },
+        fadeIn: {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
         },
       },
     },

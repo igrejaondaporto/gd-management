@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, Minus } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, Minus, X } from "lucide-react";
 import { IconButton } from "@/components/ui/IconButton";
 import { Avatar } from "@/components/ui/Avatar";
 import { SectionLabel } from "@/components/ui/SectionLabel";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { supabase } from "@/lib/supabaseClient";
 import { monthKey } from "@/lib/utils";
 import { categoryColors } from "@/lib/constants";
@@ -85,6 +86,7 @@ function useMonthAttendance(gdId: string | undefined, mKey: string) {
 }
 
 export function WeeklySummary({ weeks, gdId }: Props) {
+  const qc = useQueryClient();
   // weeks are sorted by date desc (newest first). idx 0 = most recent week.
   const [idx, setIdx] = useState(0);
   const week = weeks[idx];
@@ -95,6 +97,26 @@ export function WeeklySummary({ weeks, gdId }: Props) {
   const delta = curr && prev ? curr.total - prev.total : null;
   const mKey = week ? monthKey(week.date) : "2026-08";
   const { data: monthData } = useMonthAttendance(gdId, mKey);
+
+  // Modal state
+  const [removeTarget, setRemoveTarget] = useState<{ id: string; name: string } | null>(null);
+
+  const removeAttendance = useMutation({
+    mutationFn: async (personId: string) => {
+      if (!week?.id) return;
+      const { error } = await supabase
+        .from("attendance")
+        .delete()
+        .eq("week_id", week.id)
+        .eq("person_id", personId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["weekAttendance", week?.id] });
+      qc.invalidateQueries({ queryKey: ["monthAttendance", gdId, mKey] });
+      setRemoveTarget(null);
+    },
+  });
 
   if (!week)
     return (
@@ -193,8 +215,19 @@ export function WeeklySummary({ weeks, gdId }: Props) {
                 </div>
               </div>
             </div>
-            <div className="font-mono text-[13px] font-bold text-ink">
-              {monthCount}/{totalWeeks}
+            <div className="flex items-center gap-1.5">
+              <div className="font-mono text-[13px] font-bold text-ink">
+                {monthCount}/{totalWeeks}
+              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setRemoveTarget({ id: a.personId, name: a.name });
+                }}
+                className="cursor-pointer rounded-lg border-none bg-transparent p-1 text-rose/60 active:text-rose sm:hover:text-rose"
+              >
+                <X size={14} strokeWidth={2.5} />
+              </button>
             </div>
           </div>
         );
@@ -204,6 +237,21 @@ export function WeeklySummary({ weeks, gdId }: Props) {
           Nenhum presente registrado.
         </div>
       )}
+
+      <ConfirmModal
+        open={!!removeTarget}
+        title="Remover presença"
+        message={
+          <>
+            Tem certeza que deseja remover <strong>{removeTarget?.name}</strong>?
+          </>
+        }
+        confirmLabel="Remover"
+        onConfirm={() => removeTarget && removeAttendance.mutate(removeTarget.id)}
+        onCancel={() => setRemoveTarget(null)}
+        loading={removeAttendance.isPending}
+        variant="danger"
+      />
     </div>
   );
 }

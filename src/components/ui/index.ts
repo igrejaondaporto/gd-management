@@ -10,4 +10,5 @@ export { MiniStat } from "./MiniStat";
 export { Delta } from "./Delta";
 export { BottomNav } from "./BottomNav";
 export { PhoneFrame } from "./PhoneFrame";
+export { ConfirmModal } from "./ConfirmModal";
 export { Spinner, PageLoader, ErrorMessage, EmptyState } from "./Feedback";
