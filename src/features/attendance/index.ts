@@ -1,2 +1,1 @@
-// Attendance feature — weekly attendance flow
-export {};
+export { AttendanceFlow } from "./AttendanceFlow";

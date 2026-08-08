@@ -1,0 +1,38 @@
+import { CheckCircle2 } from "lucide-react";
+import { MiniStat } from "@/components/ui/MiniStat";
+import { colors } from "@/lib/constants";
+
+interface SuccessStepProps {
+  total: number;
+  delta: number | null;
+  gdName: string;
+  nextLabel: string;
+  onExit: () => void;
+}
+
+export function SuccessStep({ total, delta, gdName, nextLabel, onExit }: SuccessStepProps) {
+  const deltaColor = delta !== null && delta >= 0 ? colors.primary : colors.gold;
+  const deltaText = delta === null ? "—" : (delta > 0 ? "+" : "") + String(delta);
+
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center px-8 text-center">
+      <div className="stamp-pop-big mb-5 flex h-[76px] w-[76px] items-center justify-center rounded-full bg-primary-soft">
+        <CheckCircle2 size={40} color={colors.primary} strokeWidth={2.2} />
+      </div>
+      <div className="font-display text-[22px] font-bold text-ink">Presenca registrada</div>
+      <div className="mt-[6px] mb-5 font-body text-[13.5px] text-ink-soft">
+        Semana de {nextLabel} — {gdName}
+      </div>
+      <div className="mb-[22px] flex gap-[10px]">
+        <MiniStat label="Presentes" value={total} color={colors.primary} />
+        <MiniStat label="Variacao" value={deltaText} color={deltaColor} />
+      </div>
+      <button
+        onClick={onExit}
+        className="cursor-pointer rounded-xl border-none bg-primary px-6 py-3 font-body text-sm font-bold text-white"
+      >
+        Voltar ao inicio
+      </button>
+    </div>
+  );
+}
