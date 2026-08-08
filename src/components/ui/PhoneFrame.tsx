@@ -8,6 +8,7 @@ interface PhoneFrameProps {
   subtitle?: string;
   badge?: { label: string; color: string; bg: string };
   onBack?: () => void;
+  rightSlot?: ReactNode;
 }
 
 export function PhoneFrame({
@@ -16,6 +17,7 @@ export function PhoneFrame({
   subtitle,
   badge,
   onBack,
+  rightSlot,
 }: PhoneFrameProps) {
   return (
     <div className="mx-auto flex w-full max-w-[430px] min-h-[700px] flex-col overflow-hidden rounded-[26px] border border-line bg-paper shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
@@ -25,17 +27,11 @@ export function PhoneFrame({
           <Church size={16} color="#fff" />
         </div>
         <div>
-          <div className="text-[10.5px] font-bold text-ink-faint tracking-[0.3px]">
-            PRESENCA GD
-          </div>
-          <div className="mt-[-1px] text-[12.5px] font-bold text-ink">
-            {title}
-          </div>
+          <div className="text-[10.5px] font-bold text-ink-faint tracking-[0.3px]">PRESENCA GD</div>
+          <div className="mt-[-1px] text-[12.5px] font-bold text-ink">{title}</div>
         </div>
         {subtitle && (
-          <span className="ml-1 text-[11px] font-semibold text-ink-soft">
-            {subtitle}
-          </span>
+          <span className="ml-1 text-[11px] font-semibold text-ink-soft">{subtitle}</span>
         )}
         {onBack && (
           <button
@@ -50,12 +46,11 @@ export function PhoneFrame({
             {badge.label}
           </Pill>
         )}
+        {rightSlot}
       </div>
 
       {/* Content */}
-      <div className="flex flex-1 flex-col overflow-y-auto min-h-0">
-        {children}
-      </div>
+      <div className="flex flex-1 flex-col overflow-y-auto min-h-0">{children}</div>
     </div>
   );
 }

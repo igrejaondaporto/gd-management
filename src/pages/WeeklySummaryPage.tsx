@@ -1,14 +1,22 @@
+import { useNavigate, useLocation } from "react-router-dom";
 import { Home, ClipboardList, BarChart3 } from "lucide-react";
 import { PhoneFrame } from "@/components/ui/PhoneFrame";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { WeeklySummary } from "@/features/attendance";
+import { AdminMenu } from "@/features/auth";
 import { useFirstLeaderGd } from "@/hooks/useLeaderGd";
 import { usePeople } from "@/hooks/usePeople";
 import { useWeeks } from "@/hooks/useWeeks";
-import { useState } from "react";
+
+const LEADER_TABS = [
+  { key: "/", label: "Inicio", icon: <Home size={20} /> },
+  { key: "/register", label: "Registrar", icon: <ClipboardList size={20} /> },
+  { key: "/summary", label: "Resumo", icon: <BarChart3 size={20} /> },
+];
 
 export default function WeeklySummaryPage() {
-  const [tab, setTab] = useState("summary");
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const { data: leaderGd, isLoading: gdLoading } = useFirstLeaderGd();
   const { data: people = [], isLoading: peopleLoading } = usePeople(leaderGd?.gdId);
@@ -19,7 +27,7 @@ export default function WeeklySummaryPage() {
   if (weeks.length === 0 && !isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-paper p-6">
-        <PhoneFrame title={leaderGd?.gdName || "GD"}>
+        <PhoneFrame title={leaderGd?.gdName || "GD"} rightSlot={<AdminMenu />}>
           <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
             <BarChart3 size={30} className="mb-[10px] text-ink-faint" />
             <div className="font-display text-[17px] font-bold text-ink">Nenhum dado ainda</div>
@@ -34,7 +42,7 @@ export default function WeeklySummaryPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-paper p-6">
-      <PhoneFrame title={leaderGd?.gdName || "GD"}>
+      <PhoneFrame title={leaderGd?.gdName || "GD"} rightSlot={<AdminMenu />}>
         <div className="flex flex-1 flex-col overflow-y-auto min-h-0">
           {isLoading ? (
             <div className="flex flex-1 items-center justify-center">
@@ -49,13 +57,9 @@ export default function WeeklySummaryPage() {
           )}
         </div>
         <BottomNav
-          tabs={[
-            { key: "home", label: "Inicio", icon: <Home size={20} /> },
-            { key: "register", label: "Registrar", icon: <ClipboardList size={20} /> },
-            { key: "summary", label: "Resumo", icon: <BarChart3 size={20} /> },
-          ]}
-          active={tab}
-          onChange={setTab}
+          tabs={LEADER_TABS}
+          active={location.pathname}
+          onChange={(key) => navigate(key)}
         />
       </PhoneFrame>
     </div>
