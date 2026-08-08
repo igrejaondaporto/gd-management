@@ -4,7 +4,7 @@ import { Home, ClipboardList, BarChart3 } from "lucide-react";
 import { PhoneFrame } from "@/components/ui/PhoneFrame";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { LeaderHome } from "@/features/attendance";
-import { useLeaderGd } from "@/hooks/useLeaderGd";
+import { useFirstLeaderGd } from "@/hooks/useLeaderGd";
 import { usePeople } from "@/hooks/usePeople";
 import { useWeeks } from "@/hooks/useWeeks";
 import { useProfile } from "@/hooks/useProfile";
@@ -13,7 +13,7 @@ export default function LeaderHomePage() {
   const [tab, setTab] = useState("home");
   const navigate = useNavigate();
 
-  const { data: leaderGd, isLoading: gdLoading } = useLeaderGd();
+  const { data: leaderGd, isLoading: gdLoading } = useFirstLeaderGd();
   const { data: profile } = useProfile();
   const { data: people = [], isLoading: peopleLoading } = usePeople(leaderGd?.gdId);
   const { data: weeks = [], isLoading: weeksLoading } = useWeeks(leaderGd?.gdId);

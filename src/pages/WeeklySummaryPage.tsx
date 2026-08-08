@@ -2,7 +2,7 @@ import { Home, ClipboardList, BarChart3 } from "lucide-react";
 import { PhoneFrame } from "@/components/ui/PhoneFrame";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { WeeklySummary } from "@/features/attendance";
-import { useLeaderGd } from "@/hooks/useLeaderGd";
+import { useFirstLeaderGd } from "@/hooks/useLeaderGd";
 import { usePeople } from "@/hooks/usePeople";
 import { useWeeks } from "@/hooks/useWeeks";
 import { useState } from "react";
@@ -10,7 +10,7 @@ import { useState } from "react";
 export default function WeeklySummaryPage() {
   const [tab, setTab] = useState("summary");
 
-  const { data: leaderGd, isLoading: gdLoading } = useLeaderGd();
+  const { data: leaderGd, isLoading: gdLoading } = useFirstLeaderGd();
   const { data: people = [], isLoading: peopleLoading } = usePeople(leaderGd?.gdId);
   const { data: weeks = [], isLoading: weeksLoading } = useWeeks(leaderGd?.gdId);
 

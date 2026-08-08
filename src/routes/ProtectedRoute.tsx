@@ -52,11 +52,11 @@ interface GdBoundaryProps {
 }
 
 export function GdBoundary({ children }: GdBoundaryProps) {
-  const { data: leaderGd, isLoading } = useLeaderGd();
+  const { data: leaderGds = [], isLoading } = useLeaderGd();
 
   if (isLoading) return <CenteredSpinner />;
 
-  if (!leaderGd) {
+  if (leaderGds.length === 0) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-paper p-6 text-center">
         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gold-soft">

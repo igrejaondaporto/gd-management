@@ -32,7 +32,7 @@ export default function AppRoutes() {
       <Route
         path="/register"
         element={
-          <ProtectedRoute allowedRoles={["leader"]}>
+          <ProtectedRoute allowedRoles={["leader", "supervisor", "pastor"]}>
             <GdBoundary>
               <AttendanceFlowPage />
             </GdBoundary>
@@ -48,11 +48,11 @@ export default function AppRoutes() {
         }
       />
 
-      {/* Pastor-only routes */}
+      {/* Pastor / Supervisor — both have full admin access */}
       <Route
         path="/pastor/users"
         element={
-          <ProtectedRoute allowedRoles={["pastor"]}>
+          <ProtectedRoute allowedRoles={["supervisor", "pastor"]}>
             <UserManagementPage />
           </ProtectedRoute>
         }
@@ -60,7 +60,7 @@ export default function AppRoutes() {
       <Route
         path="/pastor/gds"
         element={
-          <ProtectedRoute allowedRoles={["pastor"]}>
+          <ProtectedRoute allowedRoles={["supervisor", "pastor"]}>
             <GdManagementPage />
           </ProtectedRoute>
         }

@@ -1,13 +1,13 @@
 import { PhoneFrame } from "@/components/ui/PhoneFrame";
 import { AttendanceFlow } from "@/features/attendance";
-import { useLeaderGd } from "@/hooks/useLeaderGd";
+import { useFirstLeaderGd } from "@/hooks/useLeaderGd";
 import { usePeople } from "@/hooks/usePeople";
 import { useWeeks } from "@/hooks/useWeeks";
 import { useNavigate } from "react-router-dom";
 
 export default function AttendanceFlowPage() {
   const navigate = useNavigate();
-  const { data: leaderGd, isLoading: gdLoading } = useLeaderGd();
+  const { data: leaderGd, isLoading: gdLoading } = useFirstLeaderGd();
   const { data: people = [], isLoading: peopleLoading } = usePeople(leaderGd?.gdId);
   const { data: weeks = [], isLoading: weeksLoading } = useWeeks(leaderGd?.gdId);
 
