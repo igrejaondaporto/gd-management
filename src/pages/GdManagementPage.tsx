@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Archive, Edit3, Users } from "lucide-react";
 import { PhoneFrame } from "@/components/ui/PhoneFrame";
 import { NameInput } from "@/components/ui/NameInput";
 import { StaffSection } from "@/features/pastor";
+import { AdminDrawer } from "@/features/auth";
 import {
   useGds,
   useCreateGd,
@@ -11,9 +12,12 @@ import {
   useLinkStaff,
   useUnlinkStaff,
 } from "@/hooks/useGds";
+import { useState } from "react";
+
 import type { GD } from "@/types";
 
 export default function GdManagementPage() {
+  const navigate = useNavigate();
   const [showArchived, setShowArchived] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
@@ -40,8 +44,8 @@ export default function GdManagementPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-paper p-0 sm:p-6">
-      <PhoneFrame title="GDs" badge={{ label: "pastor", color: "#A9822C", bg: "#F1E2B8" }}>
+    <div className="flex min-h-dvh flex-col bg-paper sm:items-center sm:justify-center sm:p-6">
+      <PhoneFrame title="GDs" onBack={() => navigate("/")} rightSlot={<AdminDrawer />}>
         <div className="flex flex-1 flex-col overflow-y-auto px-5 pt-4 pb-4">
           <div className="mb-4 font-display text-lg font-bold text-ink">Grupos de Discipulos</div>
 

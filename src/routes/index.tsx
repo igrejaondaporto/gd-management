@@ -3,15 +3,13 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import {
   LoginPage,
   PendingPage,
-  LeaderHomePage,
-  AttendanceFlowPage,
-  WeeklySummaryPage,
+  HomePage,
   UserManagementPage,
   GdManagementPage,
   ReportsPage,
   GdDetailPage,
 } from "@/pages";
-import { ProtectedRoute, GdBoundary } from "./ProtectedRoute";
+import { ProtectedRoute } from "./ProtectedRoute";
 
 export default function AppRoutes() {
   return (
@@ -20,35 +18,27 @@ export default function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/pending" element={<PendingPage />} />
 
-      {/* Leader — requires approved profile with leader/supervisor/pastor role */}
+      {/* Home — GD picker for all approved users */}
       <Route
         path="/"
         element={
           <ProtectedRoute allowedRoles={["leader", "supervisor", "pastor"]}>
-            <LeaderHomePage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/register"
-        element={
-          <ProtectedRoute allowedRoles={["leader", "supervisor", "pastor"]}>
-            <GdBoundary>
-              <AttendanceFlowPage />
-            </GdBoundary>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/summary"
-        element={
-          <ProtectedRoute allowedRoles={["leader", "supervisor", "pastor"]}>
-            <WeeklySummaryPage />
+            <HomePage />
           </ProtectedRoute>
         }
       />
 
-      {/* Pastor / Supervisor — both have full admin access */}
+      {/* GD Detail — sub-nav with Home | Registrar | Resumo */}
+      <Route
+        path="/gd/:gdId"
+        element={
+          <ProtectedRoute allowedRoles={["leader", "supervisor", "pastor"]}>
+            <GdDetailPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Pastor / Supervisor admin routes */}
       <Route
         path="/pastor/users"
         element={
@@ -66,20 +56,12 @@ export default function AppRoutes() {
         }
       />
 
-      {/* Pastor / Supervisor */}
+      {/* Reports — pastor / supervisor */}
       <Route
         path="/reports"
         element={
           <ProtectedRoute allowedRoles={["supervisor", "pastor"]}>
             <ReportsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/gd/:gdId"
-        element={
-          <ProtectedRoute allowedRoles={["supervisor", "pastor"]}>
-            <GdDetailPage />
           </ProtectedRoute>
         }
       />
