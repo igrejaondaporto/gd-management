@@ -98,8 +98,11 @@ export function WeeklySummary({ weeks, gdId }: Props) {
   const mKey = week ? monthKey(week.date) : "2026-08";
   const { data: monthData } = useMonthAttendance(gdId, mKey);
 
-  // Modal state
+  // Modal state — attendee removal
   const [removeTarget, setRemoveTarget] = useState<{ id: string; name: string } | null>(null);
+
+  // Modal state — week deletion
+  const [deleteWeekConfirm, setDeleteWeekConfirm] = useState(false);
 
   const removeAttendance = useMutation({
     mutationFn: async (personId: string) => {
@@ -115,6 +118,22 @@ export function WeeklySummary({ weeks, gdId }: Props) {
       qc.invalidateQueries({ queryKey: ["weekAttendance", week?.id] });
       qc.invalidateQueries({ queryKey: ["monthAttendance", gdId, mKey] });
       setRemoveTarget(null);
+    },
+  });
+
+  const deleteWeek = useMutation({
+    mutationFn: async () => {
+      if (!week?.id) return;
+      const { error: attErr } = await supabase.from("attendance").delete().eq("week_id", week.id);
+      if (attErr) throw attErr;
+      const { error } = await supabase.from("weeks").delete().eq("id", week.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["weeks", gdId] });
+      qc.invalidateQueries({ queryKey: ["weekAttendance", week?.id] });
+      setDeleteWeekConfirm(false);
+      if (idx > 0) setIdx(idx - 1);
     },
   });
 
@@ -238,6 +257,16 @@ export function WeeklySummary({ weeks, gdId }: Props) {
         </div>
       )}
 
+      {/* Delete week — subtle action at the bottom */}
+      <div className="mt-4 border-t border-line-soft pt-3">
+        <button
+          onClick={() => setDeleteWeekConfirm(true)}
+          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-rose/60 bg-transparent px-4 py-2.5 font-body text-[12.5px] font-bold text-rose transition-colors active:bg-rose/10 sm:hover:bg-rose/5"
+        >
+          Excluir semana de {week.label}
+        </button>
+      </div>
+
       <ConfirmModal
         open={!!removeTarget}
         title="Remover presença"
@@ -250,6 +279,22 @@ export function WeeklySummary({ weeks, gdId }: Props) {
         onConfirm={() => removeTarget && removeAttendance.mutate(removeTarget.id)}
         onCancel={() => setRemoveTarget(null)}
         loading={removeAttendance.isPending}
+        variant="danger"
+      />
+
+      <ConfirmModal
+        open={deleteWeekConfirm}
+        title="Excluir semana"
+        message={
+          <>
+            Tem certeza que deseja excluir a semana de <strong>{week.label}</strong>? Todos os
+            registros de presença dessa data serão removidos.
+          </>
+        }
+        confirmLabel="Excluir"
+        onConfirm={() => deleteWeek.mutate()}
+        onCancel={() => setDeleteWeekConfirm(false)}
+        loading={deleteWeek.isPending}
         variant="danger"
       />
     </div>
