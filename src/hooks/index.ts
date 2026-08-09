@@ -18,6 +18,7 @@ export type { GdWithStaff } from "./useGds";
 export { usePeople, useAddPerson, useUpdatePerson, useBulkAddPeople } from "./usePeople";
 export { useWeeks, useCreateWeek, useWeekAttendance } from "./useWeeks";
 export { useAllGds } from "./useAllGds";
+export { useDashboardStats } from "./useDashboardStats";
 export { useLeaderGd, useFirstLeaderGd } from "./useLeaderGd";
 export type { LeaderGd } from "./useLeaderGd";
 export { useWeekStats, useMonthPersonAttendance } from "./useWeekStats";
