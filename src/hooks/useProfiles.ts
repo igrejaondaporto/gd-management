@@ -32,7 +32,7 @@ export function useProfilesByStatus(status: ProfileStatus) {
 
 export function useApprovedProfiles() {
   return useQuery({
-    queryKey: ["profiles", "approved"],
+    queryKey: ["profiles", "approved-and-pending"],
     queryFn: async (): Promise<Profile[]> => {
       const { data, error } = await supabase
         .from("profiles")

@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { PhoneFrame } from "@/components/ui/PhoneFrame";
 import { AdminDrawer } from "@/features/auth";
 import { UserList } from "@/features/pastor";
@@ -11,8 +10,6 @@ import {
 import { useMemo } from "react";
 
 export default function UserManagementPage() {
-  const navigate = useNavigate();
-
   const pending = useProfilesByStatus("pending");
   const approved = useProfilesByStatus("approved");
   const rejected = useProfilesByStatus("rejected");
@@ -29,7 +26,7 @@ export default function UserManagementPage() {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-paper sm:items-center sm:justify-center sm:p-6">
-      <PhoneFrame title="Usuarios" onBack={() => navigate(-1)} rightSlot={<AdminDrawer />}>
+      <PhoneFrame title="Usuarios" rightSlot={<AdminDrawer />}>
         <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 pt-4 pb-4">
           <div className="mb-4 font-display text-lg font-bold text-ink">Gestao de Usuarios</div>
           <UserList

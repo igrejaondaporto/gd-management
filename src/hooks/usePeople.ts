@@ -111,3 +111,16 @@ export function useBulkAddPeople() {
     },
   });
 }
+
+export function useDeletePerson() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, gdId: _gdId }: { id: string; gdId: string }) => {
+      const { error } = await supabase.from("people").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ["people", variables.gdId] });
+    },
+  });
+}

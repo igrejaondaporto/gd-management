@@ -94,8 +94,8 @@ export function StaffSection({ gd, linkStaff, unlinkStaff }: StaffSectionProps) 
               <div className="mb-1.5 font-body text-[10.5px] font-bold text-ink-faint uppercase">
                 Adicionar
               </div>
-              <div className="flex flex-wrap gap-1.5">
-                {availableProfiles.slice(0, 10).map((p) => (
+              <div className="flex max-h-[180px] flex-wrap gap-1.5 overflow-y-auto">
+                {availableProfiles.map((p) => (
                   <button
                     key={p.id}
                     onClick={() => linkStaff.mutate({ gdId: gd.id, profileId: p.id })}

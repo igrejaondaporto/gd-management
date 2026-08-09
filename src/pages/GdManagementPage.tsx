@@ -1,23 +1,14 @@
-import { useNavigate } from "react-router-dom";
-import { Archive, Edit3, Users } from "lucide-react";
+import { Edit3, Users } from "lucide-react";
 import { PhoneFrame } from "@/components/ui/PhoneFrame";
 import { NameInput } from "@/components/ui/NameInput";
 import { StaffSection } from "@/features/pastor";
 import { AdminDrawer } from "@/features/auth";
-import {
-  useGds,
-  useCreateGd,
-  useUpdateGd,
-  useToggleGdActive,
-  useLinkStaff,
-  useUnlinkStaff,
-} from "@/hooks/useGds";
+import { useGds, useCreateGd, useUpdateGd, useLinkStaff, useUnlinkStaff } from "@/hooks/useGds";
 import { useState } from "react";
 
 import type { GD } from "@/types";
 
 export default function GdManagementPage() {
-  const navigate = useNavigate();
   const [showArchived, setShowArchived] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
@@ -25,7 +16,6 @@ export default function GdManagementPage() {
   const { data: gds, isLoading } = useGds();
   const createGd = useCreateGd();
   const updateGd = useUpdateGd();
-  const toggleActive = useToggleGdActive();
   const linkStaff = useLinkStaff();
   const unlinkStaff = useUnlinkStaff();
 
@@ -45,7 +35,7 @@ export default function GdManagementPage() {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-paper sm:items-center sm:justify-center sm:p-6">
-      <PhoneFrame title="Gerir GD's" onBack={() => navigate(-1)} rightSlot={<AdminDrawer />}>
+      <PhoneFrame title="Gerir GD's" rightSlot={<AdminDrawer />}>
         <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden px-5 pt-4 pb-4">
           <div className="mb-4 font-display text-lg font-bold text-ink">Grupos de Discipulos</div>
 
@@ -107,12 +97,6 @@ export default function GdManagementPage() {
                       className="cursor-pointer border-none bg-transparent p-1 text-ink-faint"
                     >
                       <Edit3 size={14} />
-                    </button>
-                    <button
-                      onClick={() => toggleActive.mutate({ id: gd.id, active: false })}
-                      className="cursor-pointer border-none bg-transparent p-1 text-ink-faint"
-                    >
-                      <Archive size={14} />
                     </button>
                   </>
                 )}

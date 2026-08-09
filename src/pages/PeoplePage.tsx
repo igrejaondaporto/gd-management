@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Edit3 } from "lucide-react";
+import { Edit3, Trash2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { PhoneFrame } from "@/components/ui/PhoneFrame";
 import { Avatar } from "@/components/ui/Avatar";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { AdminDrawer } from "@/features/auth";
-import { usePeople } from "@/hooks/usePeople";
+import { usePeople, useDeletePerson } from "@/hooks/usePeople";
 import { useAllGds } from "@/hooks/useAllGds";
 import { supabase } from "@/lib/supabaseClient";
 import { categoryColors } from "@/lib/constants";
@@ -44,12 +45,19 @@ function PersonRow({
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(person.name);
   const [category, setCategory] = useState<Category>(person.category);
+  const [showDelete, setShowDelete] = useState(false);
   const updatePerson = useUpdatePerson(gdId);
+  const deletePerson = useDeletePerson();
 
   const save = () => {
     if (!name.trim()) return;
     updatePerson.mutate({ id: person.id, name: name.trim(), category });
     setEditing(false);
+  };
+
+  const handleDelete = () => {
+    deletePerson.mutate({ id: person.id, gdId });
+    setShowDelete(false);
   };
 
   if (editing) {
@@ -108,12 +116,36 @@ function PersonRow({
         </div>
       </div>
       {!readOnly && (
-        <button
-          onClick={() => setEditing(true)}
-          className="cursor-pointer rounded-lg border-none bg-transparent p-2 text-ink-faint hover:text-primary"
-        >
-          <Edit3 size={15} />
-        </button>
+        <>
+          <div className="flex items-center gap-0.5">
+            <button
+              onClick={() => setEditing(true)}
+              className="cursor-pointer rounded-lg border-none bg-transparent p-2 text-ink-faint hover:text-primary"
+            >
+              <Edit3 size={15} />
+            </button>
+            <button
+              onClick={() => setShowDelete(true)}
+              className="cursor-pointer rounded-lg border-none bg-transparent p-2 text-ink-faint hover:text-rose"
+            >
+              <Trash2 size={15} />
+            </button>
+          </div>
+          <ConfirmModal
+            open={showDelete}
+            title="Excluir pessoa"
+            message={
+              <>
+                Tem certeza que deseja excluir <strong>{person.name}</strong>?
+              </>
+            }
+            confirmLabel="Excluir"
+            variant="danger"
+            onConfirm={handleDelete}
+            onCancel={() => setShowDelete(false)}
+            loading={deletePerson.isPending}
+          />
+        </>
       )}
     </div>
   );
@@ -146,7 +178,7 @@ export default function PeoplePage() {
           <div className="mb-5 font-body text-[13.5px] text-ink-soft">
             {people.length} pessoa{people.length !== 1 ? "s" : ""} cadastrada
             {people.length !== 1 ? "s" : ""}.
-            {!readOnly && " Toque em Editar para alterar nome ou categoria."}
+            {!readOnly && " Toque em Editar para alterar ou no ícone de lixeira para excluir."}
           </div>
 
           {isLoading ? (
