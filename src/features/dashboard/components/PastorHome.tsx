@@ -1,8 +1,17 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import { TrendingUp, Check, SlidersHorizontal } from "lucide-react";
-import { MiniStat } from "@/components/ui/MiniStat";
+import {
+  Check,
+  SlidersHorizontal,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  Users,
+  BarChart3,
+  TrendingUp,
+} from "lucide-react";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useAllGds } from "@/hooks/useAllGds";
+import { useProfile } from "@/hooks/useProfile";
 import { categoryColors, MONTHS_PT } from "@/lib/constants";
 import type { Category } from "@/types";
 
@@ -45,37 +54,37 @@ interface StaffMember {
 function StaffDrawer({
   open,
   selectedSupervisorIds,
-  selectedLeaderIds,
+  selectedGdIds,
   supervisors,
-  leaders,
+  gds,
+  isPastor,
   onApply,
-  onClose,
 }: {
   open: boolean;
   selectedSupervisorIds: string[];
-  selectedLeaderIds: string[];
+  selectedGdIds: string[];
   supervisors: StaffMember[];
-  leaders: StaffMember[];
-  onApply: (supervisorIds: string[], leaderIds: string[]) => void;
-  onClose: () => void;
+  gds: StaffMember[];
+  isPastor: boolean;
+  onApply: (supervisorIds: string[], gdIds: string[]) => void;
 }) {
   const [draftSup, setDraftSup] = useState(selectedSupervisorIds);
-  const [draftLead, setDraftLead] = useState(selectedLeaderIds);
+  const [draftGd, setDraftGd] = useState(selectedGdIds);
 
   useEffect(() => {
     if (open) {
       setDraftSup(selectedSupervisorIds);
-      setDraftLead(selectedLeaderIds);
+      setDraftGd(selectedGdIds);
       document.body.style.overflow = "hidden";
     }
     return () => {
       document.body.style.overflow = "";
     };
-  }, [open, selectedSupervisorIds, selectedLeaderIds]);
+  }, [open, selectedSupervisorIds, selectedGdIds]);
 
   if (!open) return null;
 
-  const total = draftSup.length + draftLead.length;
+  const total = draftSup.length + draftGd.length;
 
   const Roll = ({
     list,
@@ -118,7 +127,7 @@ function StaffDrawer({
   return (
     <div
       className="fixed inset-0 z-50 flex items-end justify-center bg-ink/20 sm:items-center sm:p-4"
-      onClick={onClose}
+      onClick={() => onApply(draftSup, draftGd)}
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -126,7 +135,7 @@ function StaffDrawer({
       >
         <div className="flex shrink-0 items-center justify-between px-5 pt-4 pb-3">
           <div className="font-display text-[16px] font-bold text-ink">
-            Filtrar equipe
+            Filtrar
             {total > 0 && (
               <span className="ml-1.5 font-mono text-[13px] text-primary">({total})</span>
             )}
@@ -136,7 +145,7 @@ function StaffDrawer({
               <button
                 onClick={() => {
                   setDraftSup([]);
-                  setDraftLead([]);
+                  setDraftGd([]);
                 }}
                 className="cursor-pointer rounded-lg border-none bg-transparent px-2 py-1 font-body text-[11px] font-semibold text-ink-faint"
               >
@@ -144,45 +153,173 @@ function StaffDrawer({
               </button>
             )}
             <button
-              onClick={() => onApply(draftSup, draftLead)}
+              onClick={() => onApply(draftSup, draftGd)}
               className="cursor-pointer rounded-lg border-none bg-primary px-3 py-1.5 font-body text-[12px] font-bold text-white"
             >
               Aplicar
             </button>
           </div>
         </div>
-
         <div className="flex-1 overflow-y-auto px-5 pb-5">
-          <div className="mb-4">
-            <div className="mb-2 font-body text-[11px] font-bold text-ink-faint uppercase tracking-[0.5px]">
-              Supervisão{" "}
-              {draftSup.length > 0 && <span className="text-primary">· {draftSup.length}</span>}
-            </div>
-            <Roll
-              list={supervisors}
-              ids={draftSup}
-              toggle={(id) =>
-                setDraftSup((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))
-              }
-              label="supervisor"
-            />
-          </div>
-          <div className="mb-4 h-px bg-line-soft" />
+          {isPastor && supervisors.length > 0 && (
+            <>
+              <div className="mb-4">
+                <div className="mb-2 font-body text-[11px] font-bold text-ink-faint uppercase tracking-[0.5px]">
+                  Supervisão{" "}
+                  {draftSup.length > 0 && <span className="text-primary">· {draftSup.length}</span>}
+                </div>
+                <Roll
+                  list={supervisors}
+                  ids={draftSup}
+                  toggle={(id) =>
+                    setDraftSup((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))
+                  }
+                  label="supervisor"
+                />
+              </div>
+              <div className="mb-4 h-px bg-line-soft" />
+            </>
+          )}
           <div>
             <div className="mb-2 font-body text-[11px] font-bold text-ink-faint uppercase tracking-[0.5px]">
-              Liderança{" "}
-              {draftLead.length > 0 && <span className="text-primary">· {draftLead.length}</span>}
+              GDs {draftGd.length > 0 && <span className="text-primary">· {draftGd.length}</span>}
             </div>
             <Roll
-              list={leaders}
-              ids={draftLead}
+              list={gds}
+              ids={draftGd}
               toggle={(id) =>
-                setDraftLead((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))
+                setDraftGd((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))
               }
-              label="líder"
+              label="GD"
             />
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Stacked Bar Chart ────────────────────────────────────
+
+function StackedBarChart({
+  data,
+  borderless,
+}: {
+  data: import("@/hooks/useDashboardStats").MonthlyPoint[];
+  borderless?: boolean;
+}) {
+  const cats: { key: Category; color: string; bg: string; label: string }[] = [
+    { key: "member", color: "#266BC6", bg: "#DCE7F8", label: "Membros" },
+    { key: "attender", color: "#A9822C", bg: "#F1E2B8", label: "Frequentadores" },
+    { key: "visitor", color: "#AF5D64", bg: "#F1DAD9", label: "Visitantes" },
+  ];
+
+  if (data.length === 0) return null;
+
+  const maxTotal = Math.max(...data.map((d) => d.total), 1);
+  const barMaxH = 104;
+  const rowH = barMaxH + 42;
+
+  return (
+    <div
+      className={`${borderless ? "" : "rounded-2xl border border-line-soft bg-card px-4 pt-3.5"} pb-4`}
+    >
+      {!borderless && (
+        <div className="mb-3 font-body text-[10.5px] font-bold text-ink-faint uppercase tracking-[0.5px]">
+          Presentes por mês
+        </div>
+      )}
+
+      {/* Bars — max 4 visible, horizontal scroll for more */}
+      <div className="scrollbar-none overflow-x-auto" style={{ paddingBottom: 4 }}>
+        <div
+          className="flex items-end gap-2"
+          style={{ minWidth: data.length > 4 ? data.length * 78 : "100%", height: rowH }}
+        >
+          {data.map((pt) => {
+            const barH = pt.total > 0 ? Math.max(6, (pt.total / maxTotal) * barMaxH) : 0;
+            const segments = cats
+              .map((c) => ({
+                key: c.key,
+                color: c.color,
+                bg: c.bg,
+                label: c.label,
+                count: pt.byCat[c.key],
+              }))
+              .filter((s) => s.count > 0);
+            const total = segments.reduce((s, c) => s + c.count, 0);
+
+            return (
+              <div
+                key={pt.month}
+                className="flex flex-col items-center"
+                style={{ width: 66, height: rowH, justifyContent: "flex-end" }}
+              >
+                {/* Total above bar — plain black */}
+                <span className="mb-1 font-mono text-[11px] font-bold text-ink">
+                  {pt.total || ""}
+                </span>
+
+                {/* Bar */}
+                {total > 0 ? (
+                  <div
+                    className="w-full overflow-hidden rounded-t-lg"
+                    style={{ height: barH, maxHeight: barMaxH }}
+                  >
+                    {segments.map((seg) => {
+                      const segPct = Math.round((seg.count / total) * 100);
+                      const segH = `${((seg.count / total) * 100).toFixed(1)}%`;
+                      const tall = barH * (seg.count / total) >= 20;
+                      return (
+                        <div
+                          key={seg.key}
+                          className="flex items-center justify-center"
+                          style={{
+                            height: segH,
+                            background: seg.bg,
+                            borderBottom: "1px solid #fff",
+                          }}
+                        >
+                          {tall && (
+                            <span
+                              className="inline-flex items-center gap-1 font-mono text-[10px] font-bold"
+                              style={{ color: seg.color }}
+                            >
+                              {seg.count}
+                              <span className="opacity-40">—</span>
+                              <span className="font-body text-[9px] opacity-60">{segPct}%</span>
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div
+                    className="w-full rounded-t-lg"
+                    style={{ height: 6, background: "#F0EDE2" }}
+                  />
+                )}
+
+                <span className="mt-1.5 font-body text-[10px] font-semibold text-ink-faint">
+                  {pt.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="mt-2 flex justify-center gap-4">
+        {cats.map((c) => (
+          <div key={c.key} className="flex items-center gap-1.5">
+            <div className="h-2.5 w-2.5 rounded-sm" style={{ background: c.bg }} />
+            <span className="font-body text-[10.5px] font-semibold" style={{ color: c.color }}>
+              {c.label}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -192,43 +329,65 @@ function StaffDrawer({
 
 export function PastorHome() {
   const { data: allGds } = useAllGds();
+  const { data: profile } = useProfile();
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const isPastor = profile?.role === "pastor";
+  const currentUserId = profile?.id;
 
   const defaultKey = useMemo(() => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
   }, []);
 
-  // Period: two-key range via inline month pills (two-tap flow)
   const [startKey, setStartKey] = useState(defaultKey);
   const [endKey, setEndKey] = useState(defaultKey);
   const [rangeStep, setRangeStep] = useState<1 | 2>(1);
 
-  // Staff: multi-select via drawer
   const [supervisorIds, setSupervisorIds] = useState<string[]>([]);
-  const [leaderIds, setLeaderIds] = useState<string[]>([]);
+  const [gdIds, setGdIds] = useState<string[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const { data: stats, isLoading } = useDashboardStats(startKey, endKey, supervisorIds, leaderIds);
+  const { data: stats, isLoading } = useDashboardStats(startKey, endKey, supervisorIds, gdIds);
 
-  const { supervisors, leaders } = useMemo(() => {
-    const sm = new Map<string, StaffMember>();
-    const lm = new Map<string, StaffMember>();
+  const supervisors = useMemo(() => {
+    if (!isPastor) return [];
+    const map = new Map<string, StaffMember>();
     for (const g of allGds?.gds || []) {
       for (const s of g.staff || []) {
-        if (!s.profileName) continue;
-        if (s.profileRole === "supervisor" && !sm.has(s.profileId))
-          sm.set(s.profileId, { id: s.profileId, name: s.profileName });
-        if (s.profileRole === "leader" && !lm.has(s.profileId))
-          lm.set(s.profileId, { id: s.profileId, name: s.profileName });
+        if (s.profileName && s.profileRole === "supervisor" && !map.has(s.profileId)) {
+          map.set(s.profileId, { id: s.profileId, name: s.profileName });
+        }
       }
     }
-    return { supervisors: Array.from(sm.values()), leaders: Array.from(lm.values()) };
-  }, [allGds?.gds]);
+    return Array.from(map.values());
+  }, [allGds?.gds, isPastor]);
 
-  const staffCount = supervisorIds.length + leaderIds.length;
+  const gds = useMemo(() => {
+    const gdList = allGds?.gds || [];
+    if (isPastor) return gdList.map((g) => ({ id: g.id, name: g.name }));
+    if (!currentUserId) return [];
+    return gdList
+      .filter((g) => g.staff?.some((s) => s.profileId === currentUserId))
+      .map((g) => ({ id: g.id, name: g.name }));
+  }, [allGds?.gds, isPastor, currentUserId]);
 
-  // Scroll to selected month on change
+  const staffCount = supervisorIds.length + gdIds.length;
+
+  // Expand/collapse
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    visao: true,
+    presentes: true,
+  });
+  const toggle = (k: string) => setOpenSections((p) => ({ ...p, [k]: !p[k] }));
+
+  // Scroll month strip
+  const scrollMonths = (dir: -1 | 1) => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: dir * 120, behavior: "smooth" });
+    }
+  };
+
   useEffect(() => {
     if (scrollRef.current) {
       const idx = MONTHS.findIndex((m) => m.key === endKey);
@@ -237,15 +396,48 @@ export function PastorHome() {
     }
   }, [endKey]);
 
-  const cats: Category[] = ["member", "attender", "visitor"];
-
-  // ── Render ────────────────────────────────────────────
+  const SectionHeader = ({
+    id,
+    icon,
+    label,
+    badge,
+  }: {
+    id: string;
+    icon: React.ReactNode;
+    label: string;
+    badge?: string;
+  }) => {
+    const isOpen = openSections[id];
+    return (
+      <button
+        onClick={() => toggle(id)}
+        className="flex w-full cursor-pointer items-center justify-between border-none bg-transparent py-2.5"
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-ink-faint">{icon}</span>
+          <span className="font-body text-[11px] font-bold uppercase tracking-[0.5px] text-ink-faint">
+            {label}
+          </span>
+          {badge && (
+            <span className="rounded-full bg-primary-soft px-1.5 py-0.5 font-mono text-[10px] font-bold text-primary">
+              {badge}
+            </span>
+          )}
+        </div>
+        <ChevronDown
+          size={15}
+          className="text-ink-faint transition-transform duration-200"
+          style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+        />
+      </button>
+    );
+  };
 
   return (
     <div className="px-5 pt-3 pb-6">
       <div className="mb-3 font-display text-2xl font-bold text-ink">Dashboards</div>
 
-      {/* ── Period: inline month strip ── */}
+      {/* ── Period (filters first) ── */}
       <div className="mb-1.5 flex items-center justify-between">
         <div className="font-body text-[10.5px] font-bold text-ink-faint uppercase tracking-[0.5px]">
           Período
@@ -255,11 +447,18 @@ export function PastorHome() {
         </div>
       </div>
 
-      <div className="mb-4 flex items-center gap-2">
+      <div className="mb-5 flex items-center gap-1.5">
+        <button
+          onClick={() => scrollMonths(-1)}
+          className="hidden shrink-0 cursor-pointer items-center rounded-full border-none bg-transparent p-0.5 text-ink-faint active:text-ink sm:flex"
+        >
+          <ChevronLeft size={14} />
+        </button>
+
         <div
           ref={scrollRef}
-          className="flex flex-1 gap-1 overflow-x-auto scrollbar-none"
-          style={{ scrollSnapType: "x proximity" }}
+          className="scrollbar-none flex flex-1 gap-1 overflow-x-auto py-0.5"
+          style={{ scrollSnapType: "x proximity", WebkitOverflowScrolling: "touch" }}
         >
           {MONTHS.map((m) => {
             const si = MONTHS.findIndex((x) => x.key === startKey);
@@ -298,7 +497,13 @@ export function PastorHome() {
           })}
         </div>
 
-        {/* ── Staff filter chip ── */}
+        <button
+          onClick={() => scrollMonths(1)}
+          className="hidden shrink-0 cursor-pointer items-center rounded-full border-none bg-transparent p-0.5 text-ink-faint active:text-ink sm:flex"
+        >
+          <ChevronRight size={14} />
+        </button>
+
         <button
           onClick={() => setDrawerOpen(true)}
           className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 font-body text-[11.5px] font-semibold transition-colors active:bg-paper-alt"
@@ -320,53 +525,74 @@ export function PastorHome() {
         </div>
       )}
 
-      {/* Stats */}
+      {/* ── Visão Geral (collapsible) ── */}
       {stats && !isLoading && (
-        <div className="space-y-4">
-          <div className="flex gap-2.5">
-            {cats.map((cat) => {
-              const count = stats.byCat[cat];
-              const pct = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
-              const c = categoryColors[cat];
-              return (
-                <div
-                  key={cat}
-                  className="flex-1 rounded-2xl px-3 py-3.5 text-center"
-                  style={{ background: c.bg }}
-                >
-                  <div
-                    className="font-mono text-[22px] font-bold leading-tight"
-                    style={{ color: c.color }}
-                  >
-                    {count}
-                  </div>
-                  <div
-                    className="mt-0.5 font-body text-[10.5px] font-semibold"
-                    style={{ color: c.color }}
-                  >
-                    {c.label}s
-                  </div>
-                  <div
-                    className="mt-0.5 inline-block rounded-full px-2 py-0.5 font-mono text-[10px] font-bold"
-                    style={{ background: c.color + "18", color: c.color }}
-                  >
-                    {pct}%
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+        <div className="mb-1 rounded-2xl border border-line-soft bg-card px-4">
+          <SectionHeader
+            id="visao"
+            icon={<Users size={15} />}
+            label="Visão geral"
+            badge={String(stats.total)}
+          />
+          {openSections.visao && (
+            <div className="pb-4">
+              <div className="mb-2 font-body text-[11px] text-ink-faint">
+                Pessoas cadastradas nos GDs selecionados (independentemente de presença no período)
+              </div>
+              <div className="flex gap-1.5 sm:gap-2.5">
+                {(["member", "attender", "visitor"] as Category[]).map((cat) => {
+                  const count = stats.byCat[cat];
+                  const pct = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
+                  const c = categoryColors[cat];
+                  return (
+                    <div
+                      key={cat}
+                      className="flex-1 rounded-2xl px-2 py-2.5 text-center sm:px-3 sm:py-3"
+                      style={{ background: c.bg }}
+                    >
+                      <div
+                        className="font-mono text-[17px] font-bold leading-tight sm:text-[20px]"
+                        style={{ color: c.color }}
+                      >
+                        {count}
+                      </div>
+                      <div
+                        className="mt-0.5 truncate font-body text-[9.5px] font-semibold sm:text-[10.5px]"
+                        style={{ color: c.color }}
+                      >
+                        {c.label}s
+                      </div>
+                      <div
+                        className="mt-0.5 inline-block rounded-full px-1.5 py-0.5 font-mono text-[9px] font-bold sm:px-2 sm:text-[10px]"
+                        style={{ background: c.color + "18", color: c.color }}
+                      >
+                        {pct}%
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
-          <div className="flex gap-[10px]">
-            <MiniStat
-              label="Novos membros"
-              value={stats.newMembers}
-              color={stats.newMembers > 0 ? "#2D8A4E" : undefined}
-            />
-            <MiniStat label="Total de pessoas" value={stats.total} />
-          </div>
+      {/* ── Presentes (collapsible) ── */}
+      {stats && !isLoading && stats.perMonth.length > 0 && (
+        <div className="rounded-2xl border border-line-soft bg-card px-4">
+          <SectionHeader id="presentes" icon={<BarChart3 size={15} />} label="Presentes por mês" />
+          {openSections.presentes && (
+            <div className="pb-4">
+              <StackedBarChart data={stats.perMonth} borderless />
+            </div>
+          )}
+        </div>
+      )}
 
-          {stats.newMembers > 0 && (
+      {/* ── Novos membros banner (outside collapse) ── */}
+      {stats && !isLoading && stats.perMonth.length > 0 && (
+        <div className="mt-3">
+          {stats.newMembers > 0 ? (
             <div
               className="flex items-center gap-2 rounded-xl px-4 py-3"
               style={{ background: "#DCE7F8" }}
@@ -377,28 +603,32 @@ export function PastorHome() {
                 {stats.newMembers > 1 ? "s" : ""} no período
               </span>
             </div>
+          ) : (
+            <div className="rounded-xl border border-line px-4 py-3 text-center font-body text-[12px] text-ink-faint">
+              Nenhum novo membro no período
+            </div>
           )}
         </div>
       )}
 
       {!stats && !isLoading && (
         <div className="py-8 text-center font-body text-[13px] text-ink-faint">
-          Nenhum dado disponível para este período.
+          Nenhum dado disponível.
         </div>
       )}
 
       <StaffDrawer
         open={drawerOpen}
         selectedSupervisorIds={supervisorIds}
-        selectedLeaderIds={leaderIds}
+        selectedGdIds={gdIds}
         supervisors={supervisors}
-        leaders={leaders}
-        onApply={(sup, lead) => {
+        gds={gds}
+        isPastor={isPastor}
+        onApply={(sup, gd) => {
           setSupervisorIds(sup);
-          setLeaderIds(lead);
+          setGdIds(gd);
           setDrawerOpen(false);
         }}
-        onClose={() => setDrawerOpen(false)}
       />
     </div>
   );
