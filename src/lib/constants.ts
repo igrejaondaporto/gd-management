@@ -81,3 +81,20 @@ export const WEEKDAY_LONG = [
   "sexta",
   "sábado",
 ] as const;
+
+/**
+ * A supervisor's/pastor's assessment of a GD (keys in English, labels in
+ * Portuguese). `tone` reuses the shared success/warning/danger chip colours,
+ * so "Bom" is the same green as "Relatórios em dia".
+ * The DB `check` constraint lists the same three keys — keep them in step.
+ */
+export const GD_STATUS = {
+  good: { label: "Bom", tone: "success" },
+  attention: { label: "Atenção", tone: "warning" },
+  bad: { label: "Ruim", tone: "danger" },
+} as const;
+
+export type GdStatus = keyof typeof GD_STATUS;
+
+/** Display order, best → worst, used by the picker. */
+export const GD_STATUS_ORDER: GdStatus[] = ["good", "attention", "bad"];

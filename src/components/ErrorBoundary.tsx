@@ -29,7 +29,7 @@ export class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) return this.props.fallback;
 
       return (
-        <div className="flex min-h-screen flex-col items-center justify-center bg-paper p-6 text-center">
+        <div className="flex min-h-dvh flex-col items-center justify-center bg-paper p-6 text-center">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-rose-soft">
             <span className="font-display text-2xl font-bold text-rose">!</span>
           </div>

@@ -1,14 +1,28 @@
 import { Church } from "lucide-react";
 import { colors } from "@/lib/constants";
 import type { LeaderGd } from "@/hooks/useLeaderGd";
+import type { ReactNode } from "react";
 
 interface GdPickerProps {
   gds: LeaderGd[];
   selectedGdId: string | null;
   onSelect: (gd: LeaderGd) => void;
+  /** Line under the GD name. `null` hides it — the supervisor/pastor list
+   *  swaps it for the status summary, which is the more useful second line. */
+  subtitle?: string | null;
+  /** Optional status line per GD, keyed by id. Only supervisors/pastors get
+   *  them — a leader sees the plain list, which is why this is a prop and not
+   *  something the picker fetches itself. */
+  badges?: Record<string, ReactNode>;
 }
 
-export function GdPicker({ gds, selectedGdId, onSelect }: GdPickerProps) {
+export function GdPicker({
+  gds,
+  selectedGdId,
+  onSelect,
+  subtitle = "Registro de presença e resumo",
+  badges,
+}: GdPickerProps) {
   if (gds.length === 0) return null;
 
   return (
@@ -34,13 +48,14 @@ export function GdPicker({ gds, selectedGdId, onSelect }: GdPickerProps) {
             <div className="flex h-[38px] w-[38px] items-center justify-center rounded-[14px] bg-primary-soft">
               <Church size={19} className="text-primary" />
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="font-display text-[15px] font-bold tracking-[-0.02em] text-ink">
                 {gd.gdName}
               </div>
-              <div className="mt-0.5 font-body text-[12px] text-ink-soft">
-                Registro de presença e resumo
-              </div>
+              {subtitle && (
+                <div className="mt-0.5 font-body text-[12px] text-ink-soft">{subtitle}</div>
+              )}
+              {badges?.[gd.gdId] && <div className="mt-1.5">{badges[gd.gdId]}</div>}
             </div>
           </button>
         ))}

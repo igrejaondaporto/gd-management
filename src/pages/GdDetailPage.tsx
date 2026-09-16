@@ -10,6 +10,8 @@ import { usePeople } from "@/hooks/usePeople";
 import { useWeeks } from "@/hooks/useWeeks";
 import { useAllGds } from "@/hooks/useAllGds";
 import { useReportStatus } from "@/hooks/useReportStatus";
+import { useProfile } from "@/hooks/useProfile";
+import { GdHealthSection } from "@/features/status";
 import { reportLabel, reportTone } from "@/lib/reportStatus";
 import { formatSchedule } from "@/lib/utils";
 
@@ -45,6 +47,8 @@ export default function GdDetailPage() {
   const { data: weeks = [], isLoading: weeksLoading } = useWeeks(gdId);
 
   const gd = allGds?.gds.find((g) => g.id === gdId);
+  const { data: profile } = useProfile();
+  const canAssess = profile?.role === "supervisor" || profile?.role === "pastor";
   // `allGds` is part of the gate, not just people/weeks: the frame's title and
   // the flow's suggested date are derived from `gd`, and rendering before it
   // resolves would compute them from a missing GD (and then never re-run, since
@@ -130,6 +134,10 @@ export default function GdDetailPage() {
                 weeks={weeks}
                 onStartFlow={() => setView("register")}
                 onViewSummary={() => setView("summary")}
+                // Only supervisors/pastors assess a GD. Leaders see the same
+                // page without it; the table's RLS would return nothing to
+                // them anyway, so this only saves a pointless request.
+                statusSlot={canAssess ? <GdHealthSection gdId={gdId!} /> : undefined}
               />
             )}
           </div>

@@ -140,6 +140,26 @@ export function formatSchedule(
   return day ?? time;
 }
 
+/** "12 set 2026 · 19:30" — a full timestamp in the user's own timezone.
+ *  Takes a timestamptz (e.g. `created_at`); `new Date()` handles the offset. */
+export function formatDateTime(iso: string): string {
+  const d = new Date(iso);
+  const day = String(d.getDate()).padStart(2, "0");
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return `${day} ${MONTHS_PT[d.getMonth()]} ${d.getFullYear()} · ${hh}:${mm}`;
+}
+
+/** Trims to the last whole word at or before `limit`, so an ellipsis never
+ *  lands mid-word. Used for previewing a status comment in a list. */
+export function truncateAtWord(text: string, limit: number): string {
+  if (text.length <= limit) return text;
+  const cut = text.slice(0, limit);
+  const lastSpace = cut.lastIndexOf(" ");
+  // Only fall back to a hard cut when the limit lands in a very long word.
+  return (lastSpace > limit * 0.6 ? cut.slice(0, lastSpace) : cut).trimEnd();
+}
+
 export function monthLabel(key: string): string {
   const [y, m] = key.split("-");
   return `${MONTHS_PT[parseInt(m, 10) - 1]} de ${y}`;

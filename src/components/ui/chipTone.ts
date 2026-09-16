@@ -1,3 +1,5 @@
+import { colors } from "@/lib/constants";
+
 /** Visual tone of a header chip / status pill. */
 export type ChipTone = "default" | "success" | "warning" | "danger";
 
@@ -21,4 +23,16 @@ export const CHIP_TONE_CLASS: Record<ChipTone, string> = {
   success: "chip chip-success",
   warning: "chip chip-warning",
   danger: "chip chip-danger",
+};
+
+/**
+ * The same tones as raw values, for the places a class cannot reach — inline
+ * styles and SVG fills. Keep in step with the `.chip-*` rules in `index.css`;
+ * both ends up meaning the same colour for the same state.
+ */
+export const CHIP_TONE_COLOR: Record<ChipTone, string> = {
+  default: colors.paper,
+  success: colors.green,
+  warning: colors.gold,
+  danger: colors.rose,
 };

@@ -1,4 +1,5 @@
 import { PhoneFrame } from "@/components/ui/PhoneFrame";
+import { AdminNav } from "@/components/AdminNav";
 import { AdminDrawer } from "@/features/auth";
 import { UserList } from "@/features/pastor";
 import {
@@ -26,7 +27,12 @@ export default function UserManagementPage() {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-backdrop">
-      <PhoneFrame title="Gerir" accent="usuários" rightSlot={<AdminDrawer />}>
+      <PhoneFrame
+        title="Gerir"
+        accent="usuários"
+        rightSlot={<AdminDrawer />}
+        bottomSlot={<AdminNav />}
+      >
         <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 pt-5 pb-4">
           <div className="mb-4 font-display text-[19px] font-bold tracking-[-0.03em] text-ink">
             Gestão de usuários

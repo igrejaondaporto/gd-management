@@ -25,6 +25,13 @@ export {
 export { useWeeks, useCreateWeek, useWeekAttendance, useAddWeekAttendance } from "./useWeeks";
 export { useAllGds } from "./useAllGds";
 export { useGdScope } from "./useGdScope";
+export {
+  useGdStatusUpdates,
+  useAddGdStatusUpdate,
+  useEditGdStatusUpdate,
+  useGdHealthOverview,
+} from "./useGdStatus";
+export type { GdStatusUpdate } from "./useGdStatus";
 export { useReportStatus } from "./useReportStatus";
 export type { GdReportStatus } from "./useReportStatus";
 export { useDashboardStats } from "./useDashboardStats";

@@ -271,8 +271,14 @@ body {
   @apply bg-paper text-ink font-body antialiased;
 }
 
+/* `100vh` on iOS is the height with the browser toolbars HIDDEN, so while they
+   are showing it is taller than the visible area. The app inside sizes itself
+   with `h-dvh` and stops at the bottom nav, but the extra `#root` height
+   rendered as a blank strip under it. `dvh` tracks the visible viewport; the
+   `vh` line stays as the fallback for browsers without `dvh`. */
 #root {
-  @apply min-h-screen;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* ===== Hidden scrollbar (matching prototype) ===== */

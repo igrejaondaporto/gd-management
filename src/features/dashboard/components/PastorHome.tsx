@@ -9,13 +9,16 @@ import {
   BarChart3,
   TrendingUp,
   FileWarning,
+  HeartPulse,
 } from "lucide-react";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useAllGds } from "@/hooks/useAllGds";
 import { useGdScope } from "@/hooks/useGdScope";
 import { useReportStatus } from "@/hooks/useReportStatus";
+import { useGdHealthOverview } from "@/hooks/useGdStatus";
 import { useProfile } from "@/hooks/useProfile";
 import { ReportStatusPill } from "@/components/ui";
+import { GdHealthPanel } from "@/features/status";
 import { categoryColors, colors, MONTHS_PT } from "@/lib/constants";
 import type { Category } from "@/types";
 
@@ -359,6 +362,22 @@ export function PastorHome() {
   // the user happens to have selected would make the colours jump around.
   const { data: gdScope } = useGdScope(supervisorIds, gdIds);
   const { data: reportStatus, isLoading: statusLoading } = useReportStatus(gdScope ?? null);
+  const { data: health = {} } = useGdHealthOverview(gdScope ?? null);
+
+  // GDs in scope, for the health list. Carries the same filter as every other
+  // section so the three can never show different sets of groups.
+  const scopedGds = useMemo(() => {
+    const all = allGds?.gds || [];
+    if (!gdScope) return all.map((g) => ({ id: g.id, name: g.name }));
+    const allowed = new Set(gdScope);
+    return all.filter((g) => allowed.has(g.id)).map((g) => ({ id: g.id, name: g.name }));
+  }, [allGds?.gds, gdScope]);
+
+  /** GDs in scope whose latest assessment is not "good". Drives the badge. */
+  const notGoodCount = scopedGds.filter((g) => {
+    const latest = health[g.id]?.[0];
+    return latest && latest.status !== "good";
+  }).length;
 
   const statusRows = useMemo(
     () => (reportStatus ?? []).filter((r) => r.expected > 0),
@@ -396,6 +415,7 @@ export function PastorHome() {
     visao: true,
     presentes: true,
     relatorios: true,
+    saude: true,
   });
   const toggle = (k: string) => setOpenSections((p) => ({ ...p, [k]: !p[k] }));
 
@@ -594,6 +614,24 @@ export function PastorHome() {
                   );
                 })}
               </div>
+
+              {/* New members used to be a banner after every card. Inside the
+                  overview it belongs to the same question: who is in these GDs. */}
+              <div className="mt-3">
+                {stats.newMembers > 0 ? (
+                  <div className="flex items-center gap-2 rounded-xl bg-primary-soft px-4 py-3">
+                    <TrendingUp size={16} className="text-primary" />
+                    <span className="font-body text-[12.5px] font-semibold text-primary">
+                      +{stats.newMembers} novo{stats.newMembers > 1 ? "s" : ""} membro
+                      {stats.newMembers > 1 ? "s" : ""} no período
+                    </span>
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-line px-4 py-3 text-center font-body text-[12px] text-ink-faint">
+                    Nenhum novo membro no período
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -601,7 +639,9 @@ export function PastorHome() {
 
       {/* ── "Presentes" section (collapsible) ── */}
       {stats && !isLoading && stats.perMonth.length > 0 && (
-        <div className="rounded-2xl border border-line-soft bg-card px-4">
+        // `mb-1` matches every other card: without it the next section sat
+        // flush against this one and the two read as a single block.
+        <div className="mb-1 rounded-2xl border border-line-soft bg-card px-4">
           <SectionHeader id="presentes" icon={<BarChart3 size={15} />} label="Presentes por mês" />
           {openSections.presentes && (
             <div className="pb-4">
@@ -649,30 +689,36 @@ export function PastorHome() {
         </div>
       )}
 
+      {/* ── "Saúde do GD" section (collapsible, read-only) — kept last ── */}
+      {scopedGds.length > 0 && Object.keys(health).length > 0 && (
+        <div className="mb-1 rounded-2xl border border-line-soft bg-card px-4">
+          <SectionHeader
+            id="saude"
+            icon={<HeartPulse size={15} />}
+            label="Saúde do GD"
+            badge={
+              // Only worth a badge when something needs attention. `String(0)`
+              // is truthy, so the count has to be tested as a number.
+              notGoodCount > 0 ? String(notGoodCount) : undefined
+            }
+          />
+          {openSections.saude && (
+            <div className="pb-4">
+              <div className="mb-3 font-body text-[11px] text-ink-faint">
+                Avaliação mais recente de cada GD. Toque para ver o comentário completo e o
+                histórico.
+              </div>
+              <GdHealthPanel gds={scopedGds} health={health} />
+            </div>
+          )}
+        </div>
+      )}
+
       {statusLoading && !statusRows.length && (
         <div className="mb-1 rounded-2xl border border-line-soft bg-card px-4 py-4">
           <div className="flex justify-center">
             <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           </div>
-        </div>
-      )}
-
-      {/* ── "Novos membros" banner (outside collapse) ── */}
-      {stats && !isLoading && stats.perMonth.length > 0 && (
-        <div className="mt-3">
-          {stats.newMembers > 0 ? (
-            <div className="flex items-center gap-2 rounded-xl bg-primary-soft px-4 py-3">
-              <TrendingUp size={16} className="text-primary" />
-              <span className="font-body text-[12.5px] font-semibold text-primary">
-                +{stats.newMembers} novo{stats.newMembers > 1 ? "s" : ""} membro
-                {stats.newMembers > 1 ? "s" : ""} no período
-              </span>
-            </div>
-          ) : (
-            <div className="rounded-xl border border-line px-4 py-3 text-center font-body text-[12px] text-ink-faint">
-              Nenhum novo membro no período
-            </div>
-          )}
         </div>
       )}
 

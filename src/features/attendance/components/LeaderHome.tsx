@@ -6,6 +6,7 @@ import { endOfMonth, monthKey, startOfMonth } from "@/lib/utils";
 import { supabase } from "@/lib/supabaseClient";
 import { MONTHS_PT, colors } from "@/lib/constants";
 import type { Person, Week } from "@/types";
+import type { ReactNode } from "react";
 
 interface LeaderHomeProps {
   gdId: string;
@@ -14,6 +15,9 @@ interface LeaderHomeProps {
   onStartFlow: () => void;
   readOnly?: boolean;
   onViewSummary?: () => void;
+  /** Supervisor/pastor-only block (the GD status section). Rendered below the
+   *  stats so this component keeps owning the layout order. */
+  statusSlot?: ReactNode;
 }
 
 function useWeekPresentCount(weekId: string | undefined) {
@@ -67,6 +71,7 @@ export function LeaderHome({
   onStartFlow,
   readOnly = false,
   onViewSummary,
+  statusSlot,
 }: LeaderHomeProps) {
   const navigate = useNavigate();
   const lastWeek = weeks.length > 0 ? weeks[0] : null;
@@ -134,6 +139,8 @@ export function LeaderHome({
         />
         <MiniStat label="Novos membros" value={newMembers} color={colors.gold} />
       </div>
+
+      {statusSlot}
     </div>
   );
 }

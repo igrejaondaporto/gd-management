@@ -11,6 +11,7 @@ export { Delta } from "./Delta";
 export { WeekdayPicker } from "./WeekdayPicker";
 export { TimePicker } from "./TimePicker";
 export { ReportStatusPill } from "./ReportStatusPill";
+export { ExpandableText } from "./ExpandableText";
 export { BottomNav } from "./BottomNav";
 export { PhoneFrame } from "./PhoneFrame";
 export { ConfirmModal } from "./ConfirmModal";

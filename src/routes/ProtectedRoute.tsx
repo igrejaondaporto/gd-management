@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
 
 function CenteredSpinner() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-paper">
+    <div className="flex min-h-dvh items-center justify-center bg-paper">
       <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-primary border-t-transparent" />
     </div>
   );
@@ -15,7 +15,7 @@ function CenteredSpinner() {
 
 function AccessDenied() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-paper p-6 text-center">
+    <div className="flex min-h-dvh flex-col items-center justify-center bg-paper p-6 text-center">
       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-rose-soft">
         <span className="font-display text-2xl font-bold text-rose">!</span>
       </div>
@@ -58,7 +58,7 @@ export function GdBoundary({ children }: GdBoundaryProps) {
 
   if (leaderGds.length === 0) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-paper p-6 text-center">
+      <div className="flex min-h-dvh flex-col items-center justify-center bg-paper p-6 text-center">
         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gold-soft">
           <span className="font-display text-2xl font-bold text-gold">!</span>
         </div>

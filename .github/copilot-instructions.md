@@ -30,7 +30,9 @@ src/
     auth/             AuthProvider, AdminDrawer
     pastor/components UserList, StaffSection
     attendance/       AttendanceFlow, LeaderHome, WeeklySummary, GdPicker + 5 step components
-    dashboard/        PastorHome (month + team filters, stats, report status)
+    status/           "Saúde do GD": GdHealthSection (GD page, editable) + StatusUpdateSheet
+                      + GdHealthPill + GdHealthPanel/GdHealthSheet (dashboard, read-only)
+    dashboard/        PastorHome (month + team filters, stats, report status, GD health)
   hooks/              All data hooks (useProfile, usePeople, useWeeks, useGds, useLeaderGd...)
   pages/              THIN pages — only compose hooks + feature components, no business logic
   routes/             AppRoutes, ProtectedRoute, GdBoundary
@@ -68,7 +70,7 @@ Roles are **global per user** (`profiles.role`), not per-GD. A pastor/supervisor
 
 ## Database Schema
 
-6 tables: `profiles`, `gds`, `gd_staff`, `people`, `weeks`, `attendance`.
+7 tables: `profiles`, `gds`, `gd_staff`, `people`, `weeks`, `attendance`, `gd_status_updates`.
 
 - `profiles` — mirrors `auth.users`, adds `status` (pending/approved/rejected) and `role`.
 - `gds` — groups of disciples. Has `weekday` (0-6, 0 = Sunday, matching JS `Date.getDay()`) and `start_time` (`time`, serialised as `"HH:MM:SS"` — use `formatTime()`) describing when the group meets. Both nullable — null means not set.
@@ -76,6 +78,7 @@ Roles are **global per user** (`profiles.role`), not per-GD. A pastor/supervisor
 - `people` — visitors/attenders/members in a GD. Categories: `visitor`, `attender`, `member`.
 - `weeks` — one row per GD per week (`unique(gd_id, date)`).
 - `attendance` — links weeks to people. Has `category_at_time` to preserve historical category.
+- `gd_status_updates` — **append-only** log of a supervisor's assessment of a GD (`good`/`attention`/`bad`). There is no "current status" column or table: the current status is the newest row and the history is every row, so the two can never disagree. A `before insert` trigger sets `created_by`/`created_by_name`/`created_at` server-side so the author cannot be forged. **The newest row may be edited by its author** (to fix a typo without faking a new assessment); older rows are frozen. There is no DELETE policy at all.
 
 ### Key RPCs
 
@@ -97,7 +100,7 @@ Roles are **global per user** (`profiles.role`), not per-GD. A pastor/supervisor
 ## Navigation
 
 ```
-/                  GD Picker (list of linked GDs, always shown)
+/                  GD Picker (supervisor/pastor also get the health + report status chips here)
 /gd/:id            GD detail with sub-views: Home | Registrar | Resumo
 /gd/:id/people     Manage people (edit name, change category)
 /pastor/users      Approve/reject users (supervisor/pastor)
@@ -124,7 +127,7 @@ Vercel deploys on push to `main`. SPA routing handled by `vercel.json` rewrite r
 ## Supabase
 
 Project: `https://waeopvgoeadyrplrfuzk.supabase.co`
-Migrations: `supabase/migrations/` (001–012)
+Migrations: `supabase/migrations/` (001–014)
 Google OAuth configured in Auth → Providers.
 
 ## Key files to update when adding features

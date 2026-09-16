@@ -1,18 +1,21 @@
+import { useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Home, Church } from "lucide-react";
 import { PhoneFrame } from "@/components/ui/PhoneFrame";
-import { BottomNav } from "@/components/ui/BottomNav";
+import { AdminNav } from "@/components/AdminNav";
 import { GdPicker } from "@/features/attendance/components/GdPicker";
+import { GdStatusSummary } from "@/features/status";
 import { PastorHome } from "@/features/dashboard";
 import { AdminDrawer } from "@/features/auth";
 import { useLeaderGd } from "@/hooks/useLeaderGd";
 import { useProfile } from "@/hooks/useProfile";
+import { useGdHealthOverview } from "@/hooks/useGdStatus";
+import { useReportStatus } from "@/hooks/useReportStatus";
 
 type AdminTab = "home" | "gds";
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const { data: leaderGds = [], isLoading } = useLeaderGd();
   const { data: profile } = useProfile();
 
@@ -20,9 +23,26 @@ export default function HomePage() {
   const tabParam = searchParams.get("tab");
   const adminTab: AdminTab = tabParam === "gds" ? "gds" : "home";
 
-  const setAdminTab = (tab: AdminTab) => {
-    setSearchParams(tab === "gds" ? { tab: "gds" } : {}, { replace: true });
-  };
+  // Status chips for the list. Gated on `isAdmin` so a leader never fires
+  // these requests — and RLS would return nothing to them anyway, since
+  // `gd_status_updates` is supervisor/pastor-only.
+  //
+  // Scope is `null` (= every GD the caller may see) rather than the explicit
+  // list: RLS already narrows both of these to the user's own GDs, and `null`
+  // is the same query key the dashboard uses, so moving between Painel and
+  // Grupos reuses the cache instead of refetching the same rows.
+  const { data: health = {} } = useGdHealthOverview(null, isAdmin);
+  const { data: reportStatus } = useReportStatus(null, 30, isAdmin);
+
+  const badges = useMemo(() => {
+    const map: Record<string, import("react").ReactNode> = {};
+    for (const gd of leaderGds) {
+      const latest = health[gd.gdId]?.[0] ?? null;
+      const missing = reportStatus?.find((r) => r.gdId === gd.gdId)?.missing ?? 0;
+      map[gd.gdId] = <GdStatusSummary status={latest?.status ?? null} missingReports={missing} />;
+    }
+    return map;
+  }, [leaderGds, health, reportStatus]);
 
   // Leader view: simple GD picker, no BottomNav
   if (!isAdmin) {
@@ -64,16 +84,7 @@ export default function HomePage() {
         title={adminTab === "home" ? "Painel" : "Todos os"}
         accent={adminTab === "home" ? undefined : "grupos"}
         rightSlot={<AdminDrawer />}
-        bottomSlot={
-          <BottomNav
-            tabs={[
-              { key: "home", label: "Painel", icon: <Home size={20} /> },
-              { key: "gds", label: "Grupos", icon: <Church size={20} /> },
-            ]}
-            active={adminTab}
-            onChange={(key) => setAdminTab(key as AdminTab)}
-          />
-        }
+        bottomSlot={<AdminNav />}
       >
         <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
           {isLoading ? (
@@ -96,6 +107,11 @@ export default function HomePage() {
             <GdPicker
               gds={leaderGds}
               selectedGdId={null}
+              // The status line replaces the generic "Registro de presença e
+              // resumo": for someone scanning ten GDs it carries the same
+              // information about what the row does, and more about the GD.
+              subtitle={null}
+              badges={badges}
               onSelect={(gd) => navigate(`/gd/${gd.gdId}`)}
             />
           )}

@@ -1,5 +1,6 @@
 import { Edit3, Users } from "lucide-react";
 import { PhoneFrame } from "@/components/ui/PhoneFrame";
+import { AdminNav } from "@/components/AdminNav";
 import { NameInput } from "@/components/ui/NameInput";
 import { WeekdayPicker } from "@/components/ui/WeekdayPicker";
 import { TimePicker } from "@/components/ui/TimePicker";
@@ -56,7 +57,12 @@ export default function GdManagementPage() {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-backdrop">
-      <PhoneFrame title="Gerir" accent="grupos" rightSlot={<AdminDrawer />}>
+      <PhoneFrame
+        title="Gerir"
+        accent="grupos"
+        rightSlot={<AdminDrawer />}
+        bottomSlot={<AdminNav />}
+      >
         <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden px-5 pt-5 pb-4">
           <div className="mb-4 font-display text-[19px] font-bold tracking-[-0.03em] text-ink">
             Grupos de Discípulos
