@@ -28,6 +28,12 @@ export interface GD {
   id: string;
   name: string;
   active: boolean;
+  /** Meeting weekday: 0 = Sunday … 6 = Saturday, matching JS `Date.getDay()`.
+   *  Null when it was never set (all GDs that predate the column). */
+  weekday: number | null;
+  /** Meeting start time as the database returns it — `"HH:MM:SS"`. Use
+   *  `formatTime()` before showing it. Null when it was never set. */
+  startTime: string | null;
   createdAt: string;
   // joined from gd_staff
   staff?: GdStaffMember[];

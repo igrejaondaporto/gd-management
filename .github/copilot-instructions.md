@@ -24,7 +24,8 @@ Church leaders need to record who attended their weekly GD meeting (visitors, at
 
 ```
 src/
-  components/ui/      Reusable primitives (Avatar, Pill, PersonChip, BottomNav, PhoneFrame...)
+  components/ui/      Reusable primitives (Avatar, Pill, PersonChip, WeekdayPicker, TimePicker,
+                      BottomNav, PhoneFrame...)
   features/
     auth/             AuthProvider, AdminDrawer
     pastor/components UserList, StaffSection
@@ -70,7 +71,7 @@ Roles are **global per user** (`profiles.role`), not per-GD. A pastor/supervisor
 6 tables: `profiles`, `gds`, `gd_staff`, `people`, `weeks`, `attendance`.
 
 - `profiles` — mirrors `auth.users`, adds `status` (pending/approved/rejected) and `role`.
-- `gds` — groups of disciples. Has `weekday` column (0-6) for suggesting meeting dates.
+- `gds` — groups of disciples. Has `weekday` (0-6, 0 = Sunday, matching JS `Date.getDay()`) and `start_time` (`time`, serialised as `"HH:MM:SS"` — use `formatTime()`) describing when the group meets. Both nullable — null means not set.
 - `gd_staff` — many-to-many linking profiles to GDs.
 - `people` — visitors/attenders/members in a GD. Categories: `visitor`, `attender`, `member`.
 - `weeks` — one row per GD per week (`unique(gd_id, date)`).
@@ -119,7 +120,7 @@ Vercel deploys on push to `main`. SPA routing handled by `vercel.json` rewrite r
 ## Supabase
 
 Project: `https://waeopvgoeadyrplrfuzk.supabase.co`
-Migrations: `supabase/migrations/` (001–006)
+Migrations: `supabase/migrations/` (001–011)
 Google OAuth configured in Auth → Providers.
 
 ## Key files to update when adding features

@@ -9,7 +9,7 @@ import { ReviewStep, type ReviewGroup } from "./components/ReviewStep";
 import { SuccessStep } from "./components/SuccessStep";
 import { useCreateWeek } from "@/hooks/useWeeks";
 import { supabase } from "@/lib/supabaseClient";
-import { addDays, formatWeekLabel } from "@/lib/utils";
+import { formatWeekLabel, suggestWeekDate } from "@/lib/utils";
 import { colors } from "@/lib/constants";
 import type { Person, Category, Week } from "@/types";
 
@@ -20,12 +20,22 @@ const STEP_COLORS = [colors.rose, colors.gold, colors.primary, colors.green];
 interface AttendanceFlowProps {
   gdId: string;
   gdName: string;
+  /** The GD's meeting day (0 = Sunday … 6 = Saturday), or null when it was
+   *  never set. Drives the suggested date below. */
+  weekday?: number | null;
   people: Person[];
   weeks: Week[];
   onExit: () => void;
 }
 
-export function AttendanceFlow({ gdId, gdName, people, weeks, onExit }: AttendanceFlowProps) {
+export function AttendanceFlow({
+  gdId,
+  gdName,
+  weekday = null,
+  people,
+  weeks,
+  onExit,
+}: AttendanceFlowProps) {
   const [step, setStep] = useState(0);
 
   // Step 0: new visitors
@@ -53,9 +63,12 @@ export function AttendanceFlow({ gdId, gdName, people, weeks, onExit }: Attendan
     setter(next);
   }, []);
 
-  const lastWeek = weeks.length > 0 ? weeks[weeks.length - 1] : null;
-  const defaultDate = lastWeek ? addDays(lastWeek.date, 7) : "2026-08-04";
-  const [selectedDate, setSelectedDate] = useState(defaultDate);
+  // `weeks` arrives newest-first (see `useWeeks`), so the last recorded week is
+  // `weeks[0]` — not the last element. `weeks[weeks.length - 1]` is the OLDEST,
+  // which used to make the suggested date land weeks in the past and made the
+  // "vs. semana anterior" delta compare against the first week ever recorded.
+  const lastWeek = weeks[0] ?? null;
+  const [selectedDate, setSelectedDate] = useState(() => suggestWeekDate(weeks, weekday));
   const nextLabel = formatWeekLabel(selectedDate);
 
   const attenders = useMemo(() => people.filter((p) => p.category === "attender"), [people]);

@@ -9,25 +9,52 @@ import { AttendanceFlow } from "@/features/attendance";
 import { usePeople } from "@/hooks/usePeople";
 import { useWeeks } from "@/hooks/useWeeks";
 import { useAllGds } from "@/hooks/useAllGds";
+import { formatSchedule } from "@/lib/utils";
 
 type View = "home" | "register" | "summary";
+
+/** "Supervisor: Wilka Galli · Líderes: Alan Fabio, Clara Firmo" — the same
+ *  grouping the body used to show, now condensed into one header line. */
+function staffLine(staff: { profileName?: string; profileRole?: string }[]): string {
+  const names = (role: string) =>
+    staff.filter((s) => s.profileRole === role).map((s) => s.profileName || "?");
+
+  const parts: string[] = [];
+  const supervisors = names("supervisor");
+  if (supervisors.length > 0) {
+    parts.push(
+      `${supervisors.length > 1 ? "Supervisores" : "Supervisor"}: ${supervisors.join(", ")}`,
+    );
+  }
+  const leaders = names("leader");
+  if (leaders.length > 0) {
+    parts.push(`${leaders.length > 1 ? "Líderes" : "Líder"}: ${leaders.join(", ")}`);
+  }
+  return parts.join(" · ");
+}
 
 export default function GdDetailPage() {
   const { gdId } = useParams<{ gdId: string }>();
   const [view, setView] = useState<View>("home");
   const navigate = useNavigate();
 
-  const { data: allGds } = useAllGds();
+  const { data: allGds, isLoading: gdsLoading } = useAllGds();
   const { data: people = [], isLoading: peopleLoading } = usePeople(gdId);
   const { data: weeks = [], isLoading: weeksLoading } = useWeeks(gdId);
 
   const gd = allGds?.gds.find((g) => g.id === gdId);
-  const isLoading = peopleLoading || weeksLoading;
+  // `allGds` is part of the gate, not just people/weeks: the frame's title and
+  // the flow's suggested date are derived from `gd`, and rendering before it
+  // resolves would compute them from a missing GD (and then never re-run, since
+  // `AttendanceFlow` seeds its date into `useState`).
+  const isLoading = peopleLoading || weeksLoading || gdsLoading;
 
-  // Header chips: only data that actually exists. There is no time or venue
-  // per GD in the database (only `gds.weekday`), so no fixed value is made up
-  // here.
+  // Chips: only data that actually exists. The schedule is omitted when unset
+  // rather than shown as "não definido" — only a supervisor can set it (in
+  // /pastor/gds), so a leader reading this screen could not act on it anyway.
+  const schedule = formatSchedule(gd?.weekday, gd?.startTime);
   const headerChips: string[] = [];
+  if (schedule) headerChips.push(schedule);
   if (!isLoading) {
     headerChips.push(`${people.length} pessoa${people.length !== 1 ? "s" : ""}`);
     if (weeks.length > 0) {
@@ -41,6 +68,7 @@ export default function GdDetailPage() {
     <div className="flex h-dvh flex-col overflow-hidden bg-backdrop">
       <PhoneFrame
         accent={gd?.name}
+        subtitle={gd ? staffLine(gd.staff || []) || undefined : undefined}
         chips={headerChips}
         onBack={() => {
           if (view !== "home") {
@@ -62,6 +90,7 @@ export default function GdDetailPage() {
               <AttendanceFlow
                 gdId={gdId!}
                 gdName={gd?.name || "GD"}
+                weekday={gd?.weekday ?? null}
                 people={people}
                 weeks={weeks}
                 onExit={() => setView("home")}
@@ -83,10 +112,6 @@ export default function GdDetailPage() {
             ) : (
               <LeaderHome
                 gdId={gdId!}
-                staff={(gd?.staff || []).map((s) => ({
-                  name: s.profileName || "?",
-                  role: s.profileRole || null,
-                }))}
                 people={people}
                 weeks={weeks}
                 onStartFlow={() => setView("register")}

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
+import { mapGd, type GdWithStaff } from "@/hooks/useGds";
 import type { Role } from "@/types";
-import type { GdWithStaff } from "@/hooks/useGds";
 
 interface AllGdsData {
   gds: GdWithStaff[];
@@ -45,21 +45,7 @@ export function useAllGds() {
 
       if (error) throw error;
 
-      const gds: GdWithStaff[] = (data || []).map((g) => ({
-        id: g.id,
-        name: g.name,
-        active: g.active,
-        createdAt: g.created_at,
-        staff: ((g.gd_staff || []) as Record<string, unknown>[]).map((s) => {
-          const p = s.profiles as Record<string, unknown> | null;
-          return {
-            gdId: s.gd_id as string,
-            profileId: s.profile_id as string,
-            profileName: (p?.full_name as string) || undefined,
-            profileRole: (p?.role as Role) || undefined,
-          };
-        }),
-      }));
+      const gds = ((data || []) as unknown as Record<string, unknown>[]).map(mapGd);
 
       return { gds, role };
     },

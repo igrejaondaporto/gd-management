@@ -8,6 +8,8 @@ export { AddedNameChip } from "./AddedNameChip";
 export { SectionLabel } from "./SectionLabel";
 export { MiniStat } from "./MiniStat";
 export { Delta } from "./Delta";
+export { WeekdayPicker } from "./WeekdayPicker";
+export { TimePicker } from "./TimePicker";
 export { BottomNav } from "./BottomNav";
 export { PhoneFrame } from "./PhoneFrame";
 export { ConfirmModal } from "./ConfirmModal";

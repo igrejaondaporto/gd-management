@@ -67,3 +67,17 @@ export const MONTHS_PT = [
   "nov",
   "dez",
 ] as const;
+
+/** Meeting weekday of a GD. Index = `gds.weekday` = JS `Date.getDay()`,
+ *  so `Date.getDay()` can index straight into either array. */
+export const WEEKDAY_SHORT = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"] as const;
+
+export const WEEKDAY_LONG = [
+  "domingo",
+  "segunda",
+  "terça",
+  "quarta",
+  "quinta",
+  "sexta",
+  "sábado",
+] as const;
