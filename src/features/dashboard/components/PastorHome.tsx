@@ -8,10 +8,14 @@ import {
   Users,
   BarChart3,
   TrendingUp,
+  FileWarning,
 } from "lucide-react";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useAllGds } from "@/hooks/useAllGds";
+import { useGdScope } from "@/hooks/useGdScope";
+import { useReportStatus } from "@/hooks/useReportStatus";
 import { useProfile } from "@/hooks/useProfile";
+import { ReportStatusPill } from "@/components/ui";
 import { categoryColors, colors, MONTHS_PT } from "@/lib/constants";
 import type { Category } from "@/types";
 
@@ -350,6 +354,19 @@ export function PastorHome() {
 
   const { data: stats, isLoading } = useDashboardStats(startKey, endKey, supervisorIds, gdIds);
 
+  // Reporting status is deliberately *not* scoped by the month picker: "is this
+  // GD keeping up" is always about the recent past, and tying it to a period
+  // the user happens to have selected would make the colours jump around.
+  const { data: gdScope } = useGdScope(supervisorIds, gdIds);
+  const { data: reportStatus, isLoading: statusLoading } = useReportStatus(gdScope ?? null);
+
+  const statusRows = useMemo(
+    () => (reportStatus ?? []).filter((r) => r.expected > 0),
+    [reportStatus],
+  );
+  const missingTotal = statusRows.reduce((sum, r) => sum + r.missing, 0);
+  const lateCount = statusRows.filter((r) => r.missing > 0).length;
+
   const supervisors = useMemo(() => {
     if (!isPastor) return [];
     const map = new Map<string, StaffMember>();
@@ -378,6 +395,7 @@ export function PastorHome() {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     visao: true,
     presentes: true,
+    relatorios: true,
   });
   const toggle = (k: string) => setOpenSections((p) => ({ ...p, [k]: !p[k] }));
 
@@ -590,6 +608,52 @@ export function PastorHome() {
               <StackedBarChart data={stats.perMonth} borderless />
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── "Estado dos relatórios" section (collapsible) ── */}
+      {statusRows.length > 0 && (
+        <div className="mb-1 rounded-2xl border border-line-soft bg-card px-4">
+          <SectionHeader
+            id="relatorios"
+            icon={<FileWarning size={15} />}
+            label="Estado dos relatórios"
+            badge={missingTotal > 0 ? String(missingTotal) : undefined}
+          />
+          {openSections.relatorios && (
+            <div className="pb-4">
+              <div className="mb-3 font-body text-[11px] text-ink-faint">
+                {lateCount > 0
+                  ? `${lateCount} de ${statusRows.length} GDs com relatórios em falta · últimos 30 dias`
+                  : `Todos os ${statusRows.length} GDs com os relatórios em dia · últimos 30 dias`}
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                {statusRows.map((r) => (
+                  <div key={r.gdId} className="flex items-center gap-2 py-0.5">
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate font-body text-[13px] font-semibold text-ink">
+                        {r.gdName}
+                      </div>
+                      <div className="font-body text-[10.5px] text-ink-faint">
+                        {r.reported}/{r.expected} relatório{r.expected !== 1 ? "s" : ""} nos últimos
+                        30 dias
+                      </div>
+                    </div>
+                    <ReportStatusPill missing={r.missing} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {statusLoading && !statusRows.length && (
+        <div className="mb-1 rounded-2xl border border-line-soft bg-card px-4 py-4">
+          <div className="flex justify-center">
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          </div>
         </div>
       )}
 

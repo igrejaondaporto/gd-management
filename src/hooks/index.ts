@@ -24,6 +24,9 @@ export {
 } from "./usePeople";
 export { useWeeks, useCreateWeek, useWeekAttendance, useAddWeekAttendance } from "./useWeeks";
 export { useAllGds } from "./useAllGds";
+export { useGdScope } from "./useGdScope";
+export { useReportStatus } from "./useReportStatus";
+export type { GdReportStatus } from "./useReportStatus";
 export { useDashboardStats } from "./useDashboardStats";
 export { useLeaderGd, useFirstLeaderGd } from "./useLeaderGd";
 export type { LeaderGd } from "./useLeaderGd";

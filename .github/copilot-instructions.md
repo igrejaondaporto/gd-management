@@ -30,7 +30,7 @@ src/
     auth/             AuthProvider, AdminDrawer
     pastor/components UserList, StaffSection
     attendance/       AttendanceFlow, LeaderHome, WeeklySummary, GdPicker + 5 step components
-    dashboard/        PastorHome
+    dashboard/        PastorHome (month + team filters, stats, report status)
   hooks/              All data hooks (useProfile, usePeople, useWeeks, useGds, useLeaderGd...)
   pages/              THIN pages — only compose hooks + feature components, no business logic
   routes/             AppRoutes, ProtectedRoute, GdBoundary
@@ -77,9 +77,13 @@ Roles are **global per user** (`profiles.role`), not per-GD. A pastor/supervisor
 - `weeks` — one row per GD per week (`unique(gd_id, date)`).
 - `attendance` — links weeks to people. Has `category_at_time` to preserve historical category.
 
-### Key RPC
+### Key RPCs
 
 `confirm_week_attendance(p_gd_id, p_date, p_new_people[], p_promotions[], p_attendance[])` — atomic transaction creating a week + new people + category promotions + attendance records. Uses custom Postgres types (`new_person_entry`, `promotion_entry`, `attendance_entry`).
+
+`add_week_attendance(p_week_id, p_new_people[], p_entries[])` — same idea for a week that already exists (people added later). Promotes when `category_at_time` is ahead of the current category.
+
+`gd_report_status(p_gd_ids[], p_today, p_days)` — per-GD outstanding weekly reports. **The counting rule lives here and nowhere else**: matched by week (Mon–Sun, not exact date), excluding today and the GD's own `created_at`. Pass the caller's local date as `p_today` (the database runs in UTC). `security invoker`, so RLS limits it to the caller's GDs.
 
 ## Attendance Flow (Typeform-style)
 
@@ -120,7 +124,7 @@ Vercel deploys on push to `main`. SPA routing handled by `vercel.json` rewrite r
 ## Supabase
 
 Project: `https://waeopvgoeadyrplrfuzk.supabase.co`
-Migrations: `supabase/migrations/` (001–011)
+Migrations: `supabase/migrations/` (001–012)
 Google OAuth configured in Auth → Providers.
 
 ## Key files to update when adding features

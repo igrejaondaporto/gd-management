@@ -111,6 +111,26 @@
     font-weight: 500;
   }
 
+  /* ── status chips (`.chip` plus a tone) ──
+     Solid tone with ink text, not white: white on gold is only ~2.4:1, while
+     ink on these three is 4.7–7.7:1. The header is blue, so a translucent
+     head chip carries no colour and could not signal state on its own. */
+  .chip-success,
+  .chip-warning,
+  .chip-danger {
+    color: #0a0f2e;
+    font-weight: 700;
+  }
+  .chip-success {
+    background: #00a88f;
+  }
+  .chip-warning {
+    background: #e59500;
+  }
+  .chip-danger {
+    background: #e0457b;
+  }
+
   /* ── curve joining the blue header to the white body ── */
   .curva {
     display: block;

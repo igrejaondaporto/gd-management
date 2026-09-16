@@ -1,6 +1,7 @@
 import { type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
+import { CHIP_TONE_CLASS, type ChipTone } from "./chipTone";
 
 /** Curve joining the blue header to the white body — the same `path` as
  *  portal-onda (`packages/shared/src/styles/global.css`, `.curva`). */
@@ -27,6 +28,24 @@ export function Logo() {
   );
 }
 
+/** Re-exported so callers can keep importing the tone type from here. */
+export type { ChipTone };
+
+export interface Chip {
+  label: string;
+  /** `default` is the translucent header chip; the rest are solid status
+   *  pills (green / amber / red) for values that need to draw the eye. */
+  tone?: ChipTone;
+  /** Optional inline qualifier, smaller and de-emphasised (e.g. "últimos 30
+   *  dias" → "4 relatórios em falta · últimos 30 dias"). Kept on the same line
+   *  on purpose: stacking it made the pill taller than its neighbours and
+   *  broke the row's alignment. */
+  note?: string;
+}
+
+/** A chip is either a plain string — the common case — or a toned `Chip`. */
+export type ChipInput = string | Chip;
+
 interface PhoneFrameProps {
   children: ReactNode;
   /** White part of the title. Optional: some screens have the group name
@@ -36,8 +55,8 @@ interface PhoneFrameProps {
   /** Lime part of the title (e.g. `Manage` + accent `users`). */
   accent?: string;
   subtitle?: string;
-  /** Translucent labels in the header (e.g. `12 people`, `Week 38`). */
-  chips?: string[];
+  /** Labels in the header (e.g. `12 people`, `Week 38`). */
+  chips?: ChipInput[];
   onBack?: () => void;
   rightSlot?: ReactNode;
   bottomSlot?: ReactNode;
@@ -100,12 +119,27 @@ export function PhoneFrame({
         {subtitle && <p className="sob mt-[10px]">{subtitle}</p>}
 
         {chips && chips.length > 0 && (
-          <div className="mt-[18px] flex flex-wrap gap-2">
-            {chips.map((c) => (
-              <span className="chip" key={c}>
-                {c}
-              </span>
-            ))}
+          <div className="mt-[18px] flex flex-wrap items-center gap-2">
+            {chips.map((c, i) => {
+              const chip: Chip = typeof c === "string" ? { label: c } : c;
+              return (
+                <span
+                  key={`${chip.label}-${i}`}
+                  className={CHIP_TONE_CLASS[chip.tone ?? "default"]}
+                >
+                  {chip.label}
+                  {chip.note && (
+                    // Real spaces around the separator, not just CSS margin:
+                    // the accessible name is built from the text content, so a
+                    // margin-only gap reads out as "falta· últimos".
+                    <span className="text-[11px] font-semibold opacity-75">
+                      {" · "}
+                      {chip.note}
+                    </span>
+                  )}
+                </span>
+              );
+            })}
           </div>
         )}
 

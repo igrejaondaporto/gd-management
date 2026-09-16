@@ -93,6 +93,13 @@ export function monthKey(iso: string): string {
   return iso.slice(0, 7);
 }
 
+/**
+ * NOTE: the outstanding-report count used to live here as `countMissingReports`.
+ * It moved into the database (`gd_report_status`, migration 012) so the GD page
+ * and the dashboard read one implementation — the two copies had already
+ * drifted once, which is what made week-matching bugs possible.
+ */
+
 /** Postgres `time` arrives as "HH:MM:SS"; the UI only ever wants "HH:MM".
  *  Returns null for unset values so callers can fall back to their own copy. */
 export function formatTime(value: string | null | undefined): string | null {

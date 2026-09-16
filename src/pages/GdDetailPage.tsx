@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { BarChart3 } from "lucide-react";
-import { PhoneFrame } from "@/components/ui/PhoneFrame";
+import { PhoneFrame, type ChipInput } from "@/components/ui/PhoneFrame";
 import { AdminDrawer } from "@/features/auth";
 import { LeaderHome } from "@/features/attendance";
 import { WeeklySummary } from "@/features/attendance";
@@ -9,6 +9,8 @@ import { AttendanceFlow } from "@/features/attendance";
 import { usePeople } from "@/hooks/usePeople";
 import { useWeeks } from "@/hooks/useWeeks";
 import { useAllGds } from "@/hooks/useAllGds";
+import { useReportStatus } from "@/hooks/useReportStatus";
+import { reportLabel, reportTone } from "@/lib/reportStatus";
 import { formatSchedule } from "@/lib/utils";
 
 type View = "home" | "register" | "summary";
@@ -53,14 +55,26 @@ export default function GdDetailPage() {
   // rather than shown as "não definido" — only a supervisor can set it (in
   // /pastor/gds), so a leader reading this screen could not act on it anyway.
   const schedule = formatSchedule(gd?.weekday, gd?.startTime);
-  const headerChips: string[] = [];
+  // Same `gd_report_status` function the dashboard reads, so the header pill
+  // and the dashboard list can never disagree about the same GD.
+  const { data: statusRows } = useReportStatus(gd ? [gd.id] : null, 30, !!gd);
+  const missingReports = statusRows?.[0]?.missing ?? null;
+
+  const headerChips: ChipInput[] = [];
   if (schedule) headerChips.push(schedule);
   if (!isLoading) {
     headerChips.push(`${people.length} pessoa${people.length !== 1 ? "s" : ""}`);
-    if (weeks.length > 0) {
-      headerChips.push(
-        `${weeks.length} semana${weeks.length !== 1 ? "s" : ""} registada${weeks.length !== 1 ? "s" : ""}`,
-      );
+
+    // Replaces the old "N semanas registadas" counter: 0 weeks is only
+    // interesting in how many reports it leaves outstanding.
+    if (missingReports !== null) {
+      headerChips.push({
+        label: reportLabel(missingReports),
+        tone: reportTone(missingReports),
+        // Only worth spelling out the window when there is something to
+        // explain — "em dia" needs no justification.
+        note: missingReports > 0 ? "últimos 30 dias" : undefined,
+      });
     }
   }
 
