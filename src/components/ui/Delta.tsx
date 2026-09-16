@@ -1,4 +1,5 @@
 import { ArrowUp, ArrowDown, Minus } from "lucide-react";
+import { colors } from "@/lib/constants";
 
 interface DeltaProps {
   value: number | null;
@@ -21,7 +22,7 @@ export function Delta({ value }: DeltaProps) {
   return (
     <span
       className="inline-flex items-center gap-0.5 font-body text-xs font-bold"
-      style={{ color: up ? "#1F4D3E" : "#A9822C" }}
+      style={{ color: up ? colors.green : colors.gold }}
     >
       {up ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
       {Math.abs(value)} vs. semana anterior

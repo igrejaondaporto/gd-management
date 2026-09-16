@@ -48,22 +48,25 @@ export function ConfirmModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/30 p-4 sm:items-center"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/30 p-4 desktop:items-center"
       onClick={loading ? undefined : onCancel}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-[400px] animate-slide-up rounded-[18px] bg-card shadow-lg sm:rounded-2xl"
+        className="w-full max-w-[400px] animate-slide-up rounded-[18px] bg-card shadow-lg desktop:rounded-2xl"
       >
         <div className="px-5 pt-5 pb-5">
           <div className="mb-3 flex items-center gap-3">
             <div
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
-              style={{ background: isDanger ? "#F1DAD9" : "#DCE7F8" }}
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
+                isDanger ? "bg-rose-soft" : "bg-primary-soft"
+              }`}
             >
-              <AlertTriangle size={17} style={{ color: isDanger ? "#AF5D64" : "#266BC6" }} />
+              <AlertTriangle size={17} className={isDanger ? "text-rose" : "text-primary"} />
             </div>
-            <div className="font-display text-[17px] font-bold text-ink">{title}</div>
+            <div className="font-display text-[17px] font-bold tracking-[-0.03em] text-ink">
+              {title}
+            </div>
           </div>
           <div className="font-body text-[13.5px] leading-relaxed text-ink-soft">{message}</div>
         </div>
@@ -79,8 +82,9 @@ export function ConfirmModal({
           <button
             onClick={onConfirm}
             disabled={loading}
-            className="flex-1 cursor-pointer rounded-xl border-none px-4 py-2.5 font-body text-[13.5px] font-bold text-white disabled:opacity-60"
-            style={{ background: isDanger ? "#AF5D64" : "#266BC6" }}
+            className={`flex-1 cursor-pointer rounded-xl border-none px-4 py-2.5 font-body text-[13.5px] font-bold text-white disabled:opacity-60 ${
+              isDanger ? "bg-rose" : "bg-primary"
+            }`}
           >
             {loading ? "Aguarde..." : confirmLabel}
           </button>

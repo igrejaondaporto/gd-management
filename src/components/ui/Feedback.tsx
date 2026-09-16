@@ -65,7 +65,9 @@ export function EmptyState({ icon, title, description }: EmptyStateProps) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 py-10 text-center">
       {icon}
-      <div className="mt-3 font-display text-[17px] font-bold text-ink">{title}</div>
+      <div className="mt-3 font-display text-[17px] font-bold tracking-[-0.03em] text-ink">
+        {title}
+      </div>
       {description && (
         <div className="mt-1 font-body text-[13px] text-ink-faint">{description}</div>
       )}

@@ -14,13 +14,15 @@ export default function PendingPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-paper p-0 sm:p-6">
-      <PhoneFrame title="Presenca GD">
+    <div className="flex h-dvh flex-col overflow-hidden bg-backdrop">
+      <PhoneFrame title="Conta" accent="em análise">
         <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
           <div className="mb-4 flex h-[72px] w-[72px] items-center justify-center rounded-full bg-gold-soft">
             <span className="font-display text-[28px] font-bold text-gold">!</span>
           </div>
-          <h2 className="font-display text-xl font-bold text-ink">Conta criada!</h2>
+          <h2 className="font-display text-xl font-bold tracking-[-0.03em] text-ink">
+            Conta criada!
+          </h2>
           <p className="mt-2 font-body text-sm text-ink-soft">
             Seu cadastro esta aguardando aprovacao de um supervisor. Voce recebera acesso assim que
             for aprovado.
@@ -28,7 +30,7 @@ export default function PendingPage() {
           <button
             onClick={handleLogout}
             disabled={loading}
-            className="mt-8 cursor-pointer rounded-xl border border-line bg-card px-6 py-2.5 font-body text-sm font-semibold text-ink-soft transition-opacity disabled:opacity-60"
+            className="btn sec mt-8 disabled:opacity-60"
           >
             {loading ? "Saindo..." : "Sair"}
           </button>

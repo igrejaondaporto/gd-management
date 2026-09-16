@@ -34,10 +34,12 @@ export default function GdManagementPage() {
   };
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-paper sm:items-center sm:justify-center sm:p-6">
-      <PhoneFrame title="Gerir GD's" rightSlot={<AdminDrawer />}>
-        <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden px-5 pt-4 pb-4">
-          <div className="mb-4 font-display text-lg font-bold text-ink">Grupos de Discipulos</div>
+    <div className="flex h-dvh flex-col overflow-hidden bg-backdrop">
+      <PhoneFrame title="Gerir" accent="grupos" rightSlot={<AdminDrawer />}>
+        <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden px-5 pt-5 pb-4">
+          <div className="mb-4 font-display text-[19px] font-bold tracking-[-0.03em] text-ink">
+            Grupos de Discípulos
+          </div>
 
           <div className="mb-4">
             <NameInput placeholder="Nome do novo GD" onAdd={(name) => createGd.mutate(name)} />

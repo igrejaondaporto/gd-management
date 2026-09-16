@@ -166,15 +166,17 @@ export default function PeoplePage() {
   });
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-paper sm:items-center sm:justify-center sm:p-6">
+    <div className="flex h-dvh flex-col overflow-hidden bg-backdrop">
       <PhoneFrame
-        title={gd?.name || "GD"}
-        subtitle="Pessoas"
+        accent={gd?.name}
+        subtitle="Pessoas vinculadas a este grupo"
         onBack={() => navigate(-1)}
         rightSlot={<AdminDrawer />}
       >
-        <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden px-5 pt-4 pb-6">
-          <div className="mb-1 font-display text-[21px] font-bold text-ink">Pessoas do GD</div>
+        <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden px-5 pt-5 pb-6">
+          <div className="mb-1 font-display text-[21px] font-bold tracking-[-0.03em] text-ink">
+            Pessoas do GD
+          </div>
           <div className="mb-5 font-body text-[13.5px] text-ink-soft">
             {people.length} pessoa{people.length !== 1 ? "s" : ""} cadastrada
             {people.length !== 1 ? "s" : ""}.

@@ -1,6 +1,6 @@
 import { Avatar } from "@/components/ui/Avatar";
 import { SectionLabel } from "@/components/ui/SectionLabel";
-import { categoryColors } from "@/lib/constants";
+import { categoryColors, colors } from "@/lib/constants";
 import type { Category } from "@/types";
 
 const SECTION_LABELS: Record<Category, string> = {
@@ -29,7 +29,9 @@ export function ReviewStep({ nextLabel, groups }: ReviewStepProps) {
 
   return (
     <div>
-      <div className="mb-1 font-display text-[21px] font-bold text-ink">Resumo do GD</div>
+      <div className="mb-1 font-display text-[21px] font-bold tracking-[-0.03em] text-ink">
+        Resumo do GD
+      </div>
       <div className="mb-[18px] font-body text-[12.5px] text-ink-faint">Semana de {nextLabel}</div>
       <div className="mb-[18px] font-mono text-[13px] font-bold text-primary">
         {total} presente{total !== 1 ? "s" : ""}
@@ -49,7 +51,7 @@ export function ReviewStep({ nextLabel, groups }: ReviewStepProps) {
                     <Avatar
                       name={entry.name}
                       color={categoryColors[g.category].color}
-                      bg="#EDE7D4"
+                      bg={colors.paperAlt}
                       size={24}
                     />
                     <span className="font-body text-[13.5px] font-semibold text-ink">

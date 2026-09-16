@@ -2,6 +2,189 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===========================================================================
+   igrejaonda visual identity — global base
+   Ported from `portal-onda/packages/shared/src/styles/global.css`.
+   Only the structural primitives live here (gradient, curve, chips, sheet);
+   everything else is Tailwind on top of the tokens in `tailwind.config.ts`.
+   =========================================================================== */
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    /* Without this, the browser's "scroll anchoring" tries to keep the
+       tapped button in the same spot on screen after the list grows, and the
+       whole page jumps down by itself instead of opening the list in place. */
+    overflow-anchor: none;
+  }
+
+  body {
+    font-family: "Outfit", system-ui, sans-serif;
+    color: #0a0f2e;
+    background: #fff;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    overscroll-behavior-y: contain;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font-family: inherit;
+    color: inherit;
+  }
+}
+
+@layer components {
+  /* ── blue header (portal-onda's "crista") ── */
+  .crista {
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+    background-image: linear-gradient(118deg, #001ed1 0%, #0019be 52%, #001594 100%);
+  }
+  /* radial glow in the top-left corner */
+  .crista::before {
+    content: "";
+    position: absolute;
+    left: -60px;
+    top: -90px;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(120, 150, 255, 0.34), transparent 68%);
+  }
+  .crista > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── logo ── */
+  .logo {
+    font-size: 19px;
+    letter-spacing: -0.035em;
+    line-height: 1;
+    white-space: nowrap;
+    color: #fff;
+  }
+  .logo i {
+    font-style: normal;
+    font-weight: 400;
+  }
+  .logo b {
+    font-weight: 800;
+  }
+
+  /* ── lime highlight in the title ── */
+  .destaque {
+    font-style: normal;
+    color: #d8f24b;
+  }
+
+  /* ── header subtitle ── */
+  .sob {
+    font-size: 14.5px;
+    font-weight: 400;
+    opacity: 0.88;
+  }
+
+  /* ── uppercase caption ── */
+  .cap {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #6a7192;
+  }
+
+  /* ── translucent header chips ── */
+  .chip {
+    background: rgba(255, 255, 255, 0.17);
+    border-radius: 100px;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    font-weight: 500;
+  }
+
+  /* ── curve joining the blue header to the white body ── */
+  .curva {
+    display: block;
+    width: 100%;
+    height: 46px;
+    margin-bottom: -2px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── card on white ── */
+  .caixa {
+    border: 1px solid #e3e6f2;
+    border-radius: 20px;
+    background: #fff;
+  }
+
+  /* ── "present" stamp ──
+     The `stampPop` keyframes existed in index.css but no class was bound to
+     them, so `stamp-pop` / `stamp-pop-big` did nothing. Here they are bound. */
+  .stamp-pop,
+  .stamp-pop-big {
+    animation: stampPop 0.32s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  }
+
+  /* ── primary button: pill ── */
+  .btn {
+    display: inline-block;
+    box-sizing: border-box;
+    border: 0;
+    border-radius: 100px;
+    padding: 13px 22px;
+    font-size: 14.5px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    color: #fff;
+    background: #0019be;
+    cursor: pointer;
+    transition: 0.14s;
+  }
+  .btn:active {
+    transform: scale(0.96);
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  .btn.sec {
+    background: #eaeeff;
+    color: #0019be;
+  }
+  .btn.full {
+    width: 100%;
+  }
+
+  /* ── large screen (portal-onda's `@media (min-width: 900px)`) ──
+     There is no "phone frame" here: the app fills the normal viewport. What
+     changes is the header glow (bigger, so it does not get lost in a wide
+     band) and the logo, slightly larger. The centred content column and the
+     fixed pill `BottomNav` live in `PhoneFrame` / `BottomNav`, in Tailwind. */
+  @media (min-width: 900px) {
+    .crista::before {
+      width: 520px;
+      height: 520px;
+      left: -140px;
+      top: -180px;
+    }
+    .logo {
+      font-size: 22px;
+    }
+  }
+}
+
 /* ===== Prototype animations ===== */
 @keyframes stampPop {
   0% {
@@ -55,8 +238,8 @@
 
 /* ===== CSS Variables as fallback ===== */
 :root {
-  --color-paper: #f5f1e6;
-  --color-ink: #232a21;
+  --color-paper: #ffffff;
+  --color-ink: #0a0f2e;
 }
 
 /* ===== Extra reset (Tailwind preflight covers box-sizing) ===== */
@@ -89,8 +272,9 @@ body {
 
 /* ===== Global placeholder ===== */
 input::placeholder {
-  color: #9a9a8a;
+  color: #9aa0bc;
 }
+
 /* ===== Safe area support (notch phones) ===== */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0px);

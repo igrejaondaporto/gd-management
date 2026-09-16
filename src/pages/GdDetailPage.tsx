@@ -24,10 +24,24 @@ export default function GdDetailPage() {
   const gd = allGds?.gds.find((g) => g.id === gdId);
   const isLoading = peopleLoading || weeksLoading;
 
+  // Header chips: only data that actually exists. There is no time or venue
+  // per GD in the database (only `gds.weekday`), so no fixed value is made up
+  // here.
+  const headerChips: string[] = [];
+  if (!isLoading) {
+    headerChips.push(`${people.length} pessoa${people.length !== 1 ? "s" : ""}`);
+    if (weeks.length > 0) {
+      headerChips.push(
+        `${weeks.length} semana${weeks.length !== 1 ? "s" : ""} registada${weeks.length !== 1 ? "s" : ""}`,
+      );
+    }
+  }
+
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-paper sm:items-center sm:justify-center sm:p-6">
+    <div className="flex h-dvh flex-col overflow-hidden bg-backdrop">
       <PhoneFrame
-        title={gd?.name || "GD"}
+        accent={gd?.name}
+        chips={headerChips}
         onBack={() => {
           if (view !== "home") {
             setView("home");
@@ -86,7 +100,7 @@ export default function GdDetailPage() {
             <div className="border-t border-line-soft px-5 py-3">
               <button
                 onClick={() => setView("summary")}
-                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border-[1.5px] border-line bg-card px-4 py-2.5 font-body text-[13.5px] font-bold text-ink"
+                className="btn sec full flex items-center justify-center gap-2"
               >
                 <BarChart3 size={18} />
                 Ver resumo

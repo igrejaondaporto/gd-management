@@ -1,3 +1,5 @@
+import { colors } from "@/lib/constants";
+
 interface MiniStatProps {
   label: string;
   value: string | number;
@@ -23,7 +25,10 @@ export function MiniStat({ label, value, color, onClick }: MiniStatProps) {
       <div className="min-h-[26px] font-body text-[10.5px] font-bold uppercase tracking-[0.5px] leading-[13px] text-ink-faint">
         {label}
       </div>
-      <div className="mt-0.5 font-mono text-[19px] font-bold" style={{ color: color || "#232A21" }}>
+      <div
+        className="mt-0.5 font-mono text-[19px] font-bold"
+        style={{ color: color || colors.ink }}
+      >
         {value}
       </div>
     </button>

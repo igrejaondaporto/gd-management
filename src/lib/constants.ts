@@ -1,23 +1,34 @@
-// Application design tokens — mirrors tailwind.config.ts for JS/TS usage
+// Application design tokens — mirrors tailwind.config.ts for JS/TS usage.
+// Values of the igrejaonda visual identity (see packages/shared in portal-onda).
 export const colors = {
-  paper: "#F5F1E6",
-  paperAlt: "#EDE7D4",
+  paper: "#FFFFFF",
+  paperAlt: "#F4F6FD",
+  backdrop: "#F1F3FA",
   card: "#FFFFFF",
-  ink: "#232A21",
-  inkSoft: "#68695C",
-  inkFaint: "#9A9A8A",
-  line: "#DFD8C0",
-  lineSoft: "#EAE4D0",
+  ink: "#0A0F2E",
+  inkSoft: "#6A7192",
+  inkFaint: "#9AA0BC",
+  line: "#E3E6F2",
+  lineSoft: "#EFF1F8",
 
-  // primary color (blue)
-  primary: "#266BC6",
-  primaryDark: "#1B4E93",
-  primarySoft: "#DCE7F8",
+  // primary color (igrejaonda blue)
+  primary: "#0019BE",
+  primaryDark: "#001594",
+  primarySoft: "#EAEEFF",
+  night: "#000E6B",
 
-  gold: "#A9822C",
-  goldSoft: "#F1E2B8",
-  rose: "#AF5D64",
-  roseSoft: "#F1DAD9",
+  // igrejaonda accents
+  lima: "#D8F24B",
+  limaSoft: "#EEF9B8",
+  water: "#EAEEFF",
+  cyan: "#0092D4",
+  violet: "#7B5CFF",
+  green: "#00A88F",
+
+  gold: "#E59500",
+  goldSoft: "#FFF0D6",
+  rose: "#E0457B",
+  roseSoft: "#FCE4EE",
 } as const;
 
 // person category mapping (keys in English, labels in Portuguese for UI)

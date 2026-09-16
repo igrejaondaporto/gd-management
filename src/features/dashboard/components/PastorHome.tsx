@@ -12,7 +12,7 @@ import {
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useAllGds } from "@/hooks/useAllGds";
 import { useProfile } from "@/hooks/useProfile";
-import { categoryColors, MONTHS_PT } from "@/lib/constants";
+import { categoryColors, colors, MONTHS_PT } from "@/lib/constants";
 import type { Category } from "@/types";
 
 // ── Helpers ──────────────────────────────────────────────
@@ -108,11 +108,11 @@ function StaffDrawer({
           >
             <span
               className="font-body text-[13.5px] font-semibold"
-              style={{ color: sel ? "#266BC6" : "#232A21" }}
+              style={{ color: sel ? colors.primary : colors.ink }}
             >
               {p.name}
             </span>
-            {sel && <Check size={16} color="#266BC6" />}
+            {sel && <Check size={16} color={colors.primary} />}
           </button>
         );
       })}
@@ -209,9 +209,9 @@ function StackedBarChart({
   borderless?: boolean;
 }) {
   const cats: { key: Category; color: string; bg: string; label: string }[] = [
-    { key: "member", color: "#266BC6", bg: "#DCE7F8", label: "Membros" },
-    { key: "attender", color: "#A9822C", bg: "#F1E2B8", label: "Frequentadores" },
-    { key: "visitor", color: "#AF5D64", bg: "#F1DAD9", label: "Visitantes" },
+    { key: "member", ...categoryColors.member, label: "Membros" },
+    { key: "attender", ...categoryColors.attender, label: "Frequentadores" },
+    { key: "visitor", ...categoryColors.visitor, label: "Visitantes" },
   ];
 
   if (data.length === 0) return null;
@@ -277,7 +277,7 @@ function StackedBarChart({
                           style={{
                             height: segH,
                             background: seg.bg,
-                            borderBottom: "1px solid #fff",
+                            borderBottom: `1px solid ${colors.paper}`,
                           }}
                         >
                           {tall && (
@@ -297,7 +297,7 @@ function StackedBarChart({
                 ) : (
                   <div
                     className="w-full rounded-t-lg"
-                    style={{ height: 6, background: "#F0EDE2" }}
+                    style={{ height: 6, background: colors.lineSoft }}
                   />
                 )}
 
@@ -485,9 +485,13 @@ export function PastorHome() {
                 }}
                 className="shrink-0 cursor-pointer rounded-full border-none px-3 py-1.5 font-body text-[11.5px] font-semibold transition-all"
                 style={{
-                  background: isEdge ? "#266BC6" : inRange ? "#DCE7F8" : "transparent",
-                  color: isEdge ? "#fff" : inRange ? "#266BC6" : "#9A9A8A",
-                  border: isEdge || inRange ? "none" : "1.5px solid #DFD8C0",
+                  background: isEdge
+                    ? colors.primary
+                    : inRange
+                      ? colors.primarySoft
+                      : "transparent",
+                  color: isEdge ? colors.paper : inRange ? colors.primary : colors.inkFaint,
+                  border: isEdge || inRange ? "none" : `1.5px solid ${colors.line}`,
                   scrollSnapAlign: "center",
                 }}
               >
@@ -508,9 +512,9 @@ export function PastorHome() {
           onClick={() => setDrawerOpen(true)}
           className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 font-body text-[11.5px] font-semibold transition-colors active:bg-paper-alt"
           style={{
-            background: staffCount > 0 ? "#DCE7F8" : "#FFFFFF",
-            color: staffCount > 0 ? "#266BC6" : "#9A9A8A",
-            borderColor: staffCount > 0 ? "#266BC6" : "#DFD8C0",
+            background: staffCount > 0 ? colors.primarySoft : colors.paper,
+            color: staffCount > 0 ? colors.primary : colors.inkFaint,
+            borderColor: staffCount > 0 ? colors.primary : colors.line,
           }}
         >
           <SlidersHorizontal size={12} />
@@ -525,7 +529,7 @@ export function PastorHome() {
         </div>
       )}
 
-      {/* ── Visão Geral (collapsible) ── */}
+      {/* ── "Visão Geral" section (collapsible) ── */}
       {stats && !isLoading && (
         <div className="mb-1 rounded-2xl border border-line-soft bg-card px-4">
           <SectionHeader
@@ -577,7 +581,7 @@ export function PastorHome() {
         </div>
       )}
 
-      {/* ── Presentes (collapsible) ── */}
+      {/* ── "Presentes" section (collapsible) ── */}
       {stats && !isLoading && stats.perMonth.length > 0 && (
         <div className="rounded-2xl border border-line-soft bg-card px-4">
           <SectionHeader id="presentes" icon={<BarChart3 size={15} />} label="Presentes por mês" />
@@ -589,14 +593,11 @@ export function PastorHome() {
         </div>
       )}
 
-      {/* ── Novos membros banner (outside collapse) ── */}
+      {/* ── "Novos membros" banner (outside collapse) ── */}
       {stats && !isLoading && stats.perMonth.length > 0 && (
         <div className="mt-3">
           {stats.newMembers > 0 ? (
-            <div
-              className="flex items-center gap-2 rounded-xl px-4 py-3"
-              style={{ background: "#DCE7F8" }}
-            >
+            <div className="flex items-center gap-2 rounded-xl bg-primary-soft px-4 py-3">
               <TrendingUp size={16} className="text-primary" />
               <span className="font-body text-[12.5px] font-semibold text-primary">
                 +{stats.newMembers} novo{stats.newMembers > 1 ? "s" : ""} membro

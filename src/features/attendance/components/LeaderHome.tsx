@@ -114,13 +114,15 @@ export function LeaderHome({
       {!readOnly && (
         <button
           onClick={onStartFlow}
-          className="mb-4 flex w-full cursor-pointer items-center justify-between rounded-2xl border-none bg-primary px-[18px] py-[18px] text-white"
+          className="mb-4 flex w-full cursor-pointer items-center justify-between rounded-[22px] border-none bg-brand-grad px-[18px] py-[18px] text-white"
         >
           <div className="text-left">
-            <div className="font-body text-[11px] font-bold opacity-75 uppercase tracking-[0.5px]">
+            <div className="font-body text-[11px] font-bold uppercase tracking-[0.5px] opacity-75">
               Registro semanal
             </div>
-            <div className="mt-0.5 font-display text-[17px] font-bold">Registrar presenca</div>
+            <div className="mt-0.5 font-display text-[19px] font-extrabold tracking-[-0.03em]">
+              Registrar <em className="destaque">presença</em>
+            </div>
           </div>
           <ClipboardList size={26} />
         </button>
@@ -128,14 +130,14 @@ export function LeaderHome({
 
       <button
         onClick={onViewSummary}
-        className="mb-4 w-full cursor-pointer rounded-[14px] border border-primary/50 bg-card px-4 py-[14px] text-left active:bg-primary/10 sm:hover:bg-primary/5"
+        className="mb-4 w-full cursor-pointer rounded-[22px] border-none bg-primary-soft px-4 py-[16px] text-left"
       >
         <div className="flex items-center justify-between">
           <div>
-            <div className="font-body text-[11.5px] font-bold text-ink-faint">
-              {lastWeek ? "Ultima semana registrada" : "Nenhuma semana"}
+            <div className="font-body text-[11.5px] font-bold text-primary/70">
+              {lastWeek ? "Última semana registrada" : "Nenhuma semana"}
             </div>
-            <div className="mt-px font-display text-base font-bold text-ink">
+            <div className="mt-px font-display text-base font-bold tracking-[-0.02em] text-ink">
               {lastWeek ? lastWeek.label : "toque para ver"}
             </div>
           </div>
@@ -143,7 +145,7 @@ export function LeaderHome({
             <div className="font-mono text-[22px] font-bold text-primary">
               {presentCount ?? "—"}
             </div>
-            <div className="font-body text-[10.5px] text-ink-faint">presentes</div>
+            <div className="font-body text-[10.5px] text-ink-soft">presentes</div>
           </div>
         </div>
       </button>

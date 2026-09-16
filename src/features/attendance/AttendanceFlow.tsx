@@ -10,11 +10,12 @@ import { SuccessStep } from "./components/SuccessStep";
 import { useCreateWeek } from "@/hooks/useWeeks";
 import { supabase } from "@/lib/supabaseClient";
 import { addDays, formatWeekLabel } from "@/lib/utils";
+import { colors } from "@/lib/constants";
 import type { Person, Category, Week } from "@/types";
 
 const STEPS = ["Visitantes", "Frequentadores", "Membros", "Revisao"];
 
-const STEP_COLORS = ["#AF5D64", "#A9822C", "#266BC6", "#2D8A4E"];
+const STEP_COLORS = [colors.rose, colors.gold, colors.primary, colors.green];
 
 interface AttendanceFlowProps {
   gdId: string;
@@ -173,7 +174,7 @@ export function AttendanceFlow({ gdId, gdName, people, weeks, onExit }: Attendan
     setStep(4);
   };
 
-  const stepColor = STEP_COLORS[step] || "#232A21";
+  const stepColor = STEP_COLORS[step] || colors.ink;
 
   if (step === 4) {
     return (
@@ -225,7 +226,7 @@ export function AttendanceFlow({ gdId, gdName, people, weeks, onExit }: Attendan
               <div
                 key={s}
                 className="h-1.5 flex-1 rounded-sm transition-colors duration-200"
-                style={{ background: i <= step ? stepColor : "#EAE4D0" }}
+                style={{ background: i <= step ? stepColor : colors.lineSoft }}
               />
             ))}
           </div>

@@ -15,7 +15,7 @@ export function SuccessStep({ total, delta, gdName, nextLabel, onExit }: Success
     delta === null
       ? colors.inkFaint
       : delta > 0
-        ? "#2D8A4E"
+        ? colors.green
         : delta < 0
           ? colors.gold
           : colors.inkFaint;
@@ -37,11 +37,8 @@ export function SuccessStep({ total, delta, gdName, nextLabel, onExit }: Success
         <MiniStat label="Presentes" value={total} color={colors.primary} />
         <MiniStat label={deltaLabel} value={deltaText} color={deltaColor} />
       </div>
-      <button
-        onClick={onExit}
-        className="cursor-pointer rounded-xl border-none bg-primary px-6 py-3 font-body text-sm font-bold text-white"
-      >
-        Voltar ao inicio
+      <button onClick={onExit} className="btn">
+        Voltar ao início
       </button>
     </div>
   );

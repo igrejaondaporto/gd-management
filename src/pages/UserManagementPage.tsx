@@ -25,10 +25,12 @@ export default function UserManagementPage() {
   const isLoading = pending.isLoading || approved.isLoading || rejected.isLoading;
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-paper sm:items-center sm:justify-center sm:p-6">
-      <PhoneFrame title="Usuarios" rightSlot={<AdminDrawer />}>
-        <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 pt-4 pb-4">
-          <div className="mb-4 font-display text-lg font-bold text-ink">Gestao de Usuarios</div>
+    <div className="flex h-dvh flex-col overflow-hidden bg-backdrop">
+      <PhoneFrame title="Gerir" accent="usuários" rightSlot={<AdminDrawer />}>
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 pt-5 pb-4">
+          <div className="mb-4 font-display text-[19px] font-bold tracking-[-0.03em] text-ink">
+            Gestão de usuários
+          </div>
           <UserList
             profiles={allProfiles}
             isLoading={isLoading}

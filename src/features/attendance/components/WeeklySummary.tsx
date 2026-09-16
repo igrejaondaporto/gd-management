@@ -7,7 +7,7 @@ import { SectionLabel } from "@/components/ui/SectionLabel";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { supabase } from "@/lib/supabaseClient";
 import { monthKey } from "@/lib/utils";
-import { categoryColors } from "@/lib/constants";
+import { categoryColors, colors } from "@/lib/constants";
 import type { Week, Category } from "@/types";
 
 interface Props {
@@ -151,23 +151,23 @@ export function WeeklySummary({ weeks, gdId }: Props) {
           onClick={() => setIdx((i) => Math.min(weeks.length - 1, i + 1))}
           label="Semana anterior"
         >
-          <ChevronLeft size={20} color={idx === weeks.length - 1 ? "#9A9A8A" : "#232A21"} />
+          <ChevronLeft size={20} color={idx === weeks.length - 1 ? colors.inkFaint : colors.ink} />
         </IconButton>
         <div className="text-center">
           <div className="font-body text-[11px] font-bold text-ink-faint uppercase">Semana de</div>
           <div className="font-display text-[19px] font-bold text-ink">{week.label}</div>
         </div>
         <IconButton onClick={() => setIdx((i) => Math.max(0, i - 1))} label="Proxima semana">
-          <ChevronRight size={20} color={idx === 0 ? "#9A9A8A" : "#232A21"} />
+          <ChevronRight size={20} color={idx === 0 ? colors.inkFaint : colors.ink} />
         </IconButton>
       </div>
 
-      <div className="mb-[14px] rounded-2xl bg-primary px-5 py-[18px] text-white">
-        <div className="font-body text-[11.5px] font-bold opacity-80 uppercase tracking-[0.5px]">
+      <div className="mb-[14px] rounded-[22px] bg-brand-grad px-5 py-[18px] text-white">
+        <div className="font-body text-[11.5px] font-bold uppercase tracking-[0.5px] opacity-80">
           Total de presentes
         </div>
         <div className="mt-0.5 flex items-baseline gap-[10px]">
-          <div className="font-mono text-4xl font-bold">
+          <div className="font-mono text-4xl font-extrabold">
             {isLoading ? "—" : (curr?.total ?? "—")}
           </div>
           {delta !== null && (

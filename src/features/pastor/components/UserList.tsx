@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { X, UserCheck, UserX, Save } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
-import { ROLE_LABELS } from "@/lib/constants";
+import { ROLE_LABELS, colors } from "@/lib/constants";
 import type { Role, Profile, ProfileStatus } from "@/types";
 import type { UseMutationResult } from "@tanstack/react-query";
 
@@ -58,8 +58,8 @@ export function UserList({
               onClick={() => setTab(t.key)}
               className="flex-1 cursor-pointer rounded-lg border-none px-2 py-1.5 font-body text-[11.5px] font-semibold transition-colors"
               style={{
-                background: active ? "#fff" : "transparent",
-                color: active ? "#232A21" : "#9A9A8A",
+                background: active ? colors.paper : "transparent",
+                color: active ? colors.ink : colors.inkFaint,
               }}
             >
               {t.label}
@@ -94,8 +94,8 @@ export function UserList({
             <div className="flex items-center gap-3">
               <Avatar
                 name={p.fullName || p.email}
-                color={p.role ? "#266BC6" : "#9A9A8A"}
-                bg={p.role ? "#DCE7F8" : "#EAE4D0"}
+                color={p.role ? colors.primary : colors.inkFaint}
+                bg={p.role ? colors.primarySoft : colors.lineSoft}
                 size={36}
               />
               <div className="min-w-0 flex-1">

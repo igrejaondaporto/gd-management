@@ -30,7 +30,7 @@ export function MemberStep({
 }: MemberStepProps) {
   return (
     <div>
-      <div className="mb-1 font-display text-[21px] font-bold text-ink">
+      <div className="mb-1 font-display text-[21px] font-bold tracking-[-0.03em] text-ink">
         Quem esteve entre os membros?
       </div>
       <div className="mb-[18px] font-body text-[12.5px] text-ink-faint">

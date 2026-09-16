@@ -1,5 +1,6 @@
 import { Avatar } from "./Avatar";
 import { StampBadge } from "./StampBadge";
+import { colors } from "@/lib/constants";
 
 interface PersonChipProps {
   name: string;
@@ -34,7 +35,7 @@ export function PersonChip({
           : dashed
             ? `1.5px dashed ${color}`
             : `1.5px solid ${color}`,
-        background: selected ? selectedBg || bg : "#FFFFFF",
+        background: selected ? selectedBg || bg : colors.paper,
       }}
     >
       <Avatar

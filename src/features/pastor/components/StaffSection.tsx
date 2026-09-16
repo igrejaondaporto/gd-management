@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Plus, ChevronDown, ChevronUp, X } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
-import { ROLE_LABELS, ROLE_LABELS_PLURAL } from "@/lib/constants";
+import { ROLE_LABELS, ROLE_LABELS_PLURAL, colors } from "@/lib/constants";
 import { useApprovedProfiles } from "@/hooks/useProfiles";
 import type { GdWithStaff } from "@/hooks/useGds";
 import type { UseMutationResult } from "@tanstack/react-query";
@@ -40,7 +40,12 @@ export function StaffSection({ gd, linkStaff, unlinkStaff }: StaffSectionProps) 
             key={s.profileId}
             className="flex items-center gap-[5px] rounded-full bg-primary-soft py-[3px] pl-1.5 pr-2"
           >
-            <Avatar name={s.profileName || "?"} color="#266BC6" bg="#fff" size={18} />
+            <Avatar
+              name={s.profileName || "?"}
+              color={colors.primary}
+              bg={colors.paper}
+              size={18}
+            />
             <span className="font-body text-[11px] font-semibold text-ink">
               {s.profileName || "Sem nome"}
             </span>

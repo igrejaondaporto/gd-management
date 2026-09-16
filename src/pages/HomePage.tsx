@@ -27,8 +27,8 @@ export default function HomePage() {
   // Leader view: simple GD picker, no BottomNav
   if (!isAdmin) {
     return (
-      <div className="flex h-dvh flex-col overflow-hidden bg-paper sm:items-center sm:justify-center sm:p-6">
-        <PhoneFrame title="Grupos" rightSlot={<AdminDrawer />}>
+      <div className="flex h-dvh flex-col overflow-hidden bg-backdrop">
+        <PhoneFrame title="Os meus" accent="grupos" rightSlot={<AdminDrawer />}>
           <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
             {isLoading ? (
               <div className="flex flex-1 items-center justify-center">
@@ -59,15 +59,16 @@ export default function HomePage() {
 
   // Pastor / Supervisor: tabbed view
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-paper sm:items-center sm:justify-center sm:p-6">
+    <div className="flex h-dvh flex-col overflow-hidden bg-backdrop">
       <PhoneFrame
-        title={adminTab === "home" ? "Inicio" : "GDs"}
+        title={adminTab === "home" ? "Painel" : "Todos os"}
+        accent={adminTab === "home" ? undefined : "grupos"}
         rightSlot={<AdminDrawer />}
         bottomSlot={
           <BottomNav
             tabs={[
-              { key: "home", label: "Inicio", icon: <Home size={20} /> },
-              { key: "gds", label: "GDs", icon: <Church size={20} /> },
+              { key: "home", label: "Painel", icon: <Home size={20} /> },
+              { key: "gds", label: "Grupos", icon: <Church size={20} /> },
             ]}
             active={adminTab}
             onChange={(key) => setAdminTab(key as AdminTab)}
