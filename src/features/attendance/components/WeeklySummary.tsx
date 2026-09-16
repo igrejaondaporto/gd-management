@@ -1,18 +1,21 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, Minus, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, Minus, X, UserPlus } from "lucide-react";
 import { IconButton } from "@/components/ui/IconButton";
 import { Avatar } from "@/components/ui/Avatar";
-import { SectionLabel } from "@/components/ui/SectionLabel";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { AddPeopleSheet, type AddedPeople } from "./AddPeopleSheet";
+import { useAddWeekAttendance } from "@/hooks/useWeeks";
 import { supabase } from "@/lib/supabaseClient";
 import { monthKey } from "@/lib/utils";
 import { categoryColors, colors } from "@/lib/constants";
-import type { Week, Category } from "@/types";
+import type { Week, Category, Person } from "@/types";
 
 interface Props {
   weeks: Week[];
   gdId: string;
+  /** Roster of the GD — used to offer the people missing from the week. */
+  people: Person[];
 }
 
 interface AttendeeRow {
@@ -85,7 +88,7 @@ function useMonthAttendance(gdId: string | undefined, mKey: string) {
   });
 }
 
-export function WeeklySummary({ weeks, gdId }: Props) {
+export function WeeklySummary({ weeks, gdId, people }: Props) {
   const qc = useQueryClient();
   // weeks are sorted by date desc (newest first). idx 0 = most recent week.
   const [idx, setIdx] = useState(0);
@@ -103,6 +106,24 @@ export function WeeklySummary({ weeks, gdId }: Props) {
 
   // Modal state — week deletion
   const [deleteWeekConfirm, setDeleteWeekConfirm] = useState(false);
+
+  // Modal state — adding forgotten people to this week
+  const [addOpen, setAddOpen] = useState(false);
+  const presentIds = useMemo(() => new Set((curr?.attendees ?? []).map((a) => a.personId)), [curr]);
+  const addAttendance = useAddWeekAttendance();
+
+  const handleAddPeople = (payload: AddedPeople) => {
+    if (!week?.id) return;
+    addAttendance.mutate(
+      {
+        weekId: week.id,
+        gdId,
+        newPeople: payload.newPeople,
+        attendance: payload.attendance,
+      },
+      { onSuccess: () => setAddOpen(false) },
+    );
+  };
 
   const removeAttendance = useMutation({
     mutationFn: async (personId: string) => {
@@ -208,7 +229,18 @@ export function WeeklySummary({ weeks, gdId }: Props) {
         ))}
       </div>
 
-      <SectionLabel>Presentes nesta semana</SectionLabel>
+      <div className="mb-[10px] flex items-center justify-between gap-3">
+        <div className="font-body text-[12.5px] font-bold tracking-[0.6px] text-ink-soft uppercase">
+          Presentes nesta semana
+        </div>
+        <button
+          onClick={() => setAddOpen(true)}
+          className="flex shrink-0 cursor-pointer items-center gap-1 rounded-pill border-none bg-primary-soft px-3 py-1.5 font-body text-[11.5px] font-bold text-primary"
+        >
+          <UserPlus size={13} />
+          Adicionar
+        </button>
+      </div>
       {curr?.attendees.map((a) => {
         const monthCount = monthData?.personCounts[a.personId] ?? 0;
         const totalWeeks = monthData?.weekCount ?? 1;
@@ -266,6 +298,16 @@ export function WeeklySummary({ weeks, gdId }: Props) {
           Excluir semana de {week.label}
         </button>
       </div>
+
+      <AddPeopleSheet
+        open={addOpen}
+        weekLabel={week.label}
+        people={people}
+        presentIds={presentIds}
+        saving={addAttendance.isPending}
+        onClose={() => setAddOpen(false)}
+        onSubmit={handleAddPeople}
+      />
 
       <ConfirmModal
         open={!!removeTarget}

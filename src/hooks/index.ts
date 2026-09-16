@@ -22,7 +22,7 @@ export {
   useBulkAddPeople,
   useDeletePerson,
 } from "./usePeople";
-export { useWeeks, useCreateWeek, useWeekAttendance } from "./useWeeks";
+export { useWeeks, useCreateWeek, useWeekAttendance, useAddWeekAttendance } from "./useWeeks";
 export { useAllGds } from "./useAllGds";
 export { useDashboardStats } from "./useDashboardStats";
 export { useLeaderGd, useFirstLeaderGd } from "./useLeaderGd";

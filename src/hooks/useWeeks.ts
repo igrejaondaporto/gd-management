@@ -84,6 +84,51 @@ export function useCreateWeek() {
   });
 }
 
+interface AddWeekAttendanceInput {
+  weekId: string;
+  gdId: string;
+  /** People that are not in the GD yet — created as they are marked present. */
+  newPeople: { name: string; category: Category }[];
+  /** People already in the GD. `categoryAtTime` may promote them. */
+  attendance: AttendanceEntry[];
+}
+
+/**
+ * Adds people to a week that was already registered, in one transaction
+ * (`add_week_attendance`). Promotions (visitor → attender → member) happen in
+ * the same call, so the client never has to update `people` on its own.
+ */
+export function useAddWeekAttendance() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: AddWeekAttendanceInput) => {
+      const { error } = await supabase.rpc("add_week_attendance", {
+        p_week_id: input.weekId,
+        p_new_people: input.newPeople.map((p) => ({
+          name: p.name,
+          category: p.category,
+          member_since: null,
+        })),
+        p_entries: input.attendance.map((a) => ({
+          person_id: a.personId,
+          category_at_time: a.categoryAtTime,
+        })),
+      });
+
+      if (error) throw error;
+    },
+    onSuccess: (_data, variables) => {
+      // `weekAttendance` is the key used by WeeklySummary, `attendance` by the
+      // step flow — a week can be open in both.
+      qc.invalidateQueries({ queryKey: ["weekAttendance", variables.weekId] });
+      qc.invalidateQueries({ queryKey: ["attendance", variables.weekId] });
+      qc.invalidateQueries({ queryKey: ["monthAttendance", variables.gdId] });
+      // A promotion changes the person's category, so the roster is stale too.
+      qc.invalidateQueries({ queryKey: ["people", variables.gdId] });
+    },
+  });
+}
+
 export function useWeekAttendance(weekId: string | undefined) {
   return useQuery({
     queryKey: ["attendance", weekId],

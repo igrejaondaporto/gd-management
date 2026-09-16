@@ -68,7 +68,7 @@ export default function GdDetailPage() {
               />
             ) : view === "summary" ? (
               weeks.length > 0 ? (
-                <WeeklySummary weeks={weeks} gdId={gdId!} />
+                <WeeklySummary weeks={weeks} gdId={gdId!} people={people} />
               ) : (
                 <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
                   <BarChart3 size={30} className="mb-[10px] text-ink-faint" />
