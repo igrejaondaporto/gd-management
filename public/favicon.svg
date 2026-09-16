@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Favicon — Presença GD (igrejaonda).
+       Same blue gradient as every igrejaonda app (#001ed1 → #0019be → #001594);
+       only the two letters change, so the browser tab and the home screen icon
+       are recognisable at a glance. Mirrors the portal-onda base icons
+       (apps/tecnica/public/favicon.svg and siblings).
+
+       PNG/ICO variants (apple-touch-icon 180, favicon.ico at 16+32) carry the
+       same artwork, but full-bleed — no `rx` — because iOS/Windows apply their
+       own corner mask. Text size scales with the box: 22/64 for the SVG,
+       200/512 for the icons, baseline at 53% / 55%.
+
+       No icone-192/icone-512 here: those only exist for a web app manifest,
+       and this app has none. Add them back (and a manifest) if it ever
+       becomes installable as a PWA. -->
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="75%" y2="100%">
+      <stop offset="0%" stop-color="#001ed1" />
+      <stop offset="52%" stop-color="#0019be" />
+      <stop offset="100%" stop-color="#001594" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#g)" />
+  <text
+    x="50%"
+    y="53%"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    font-family="Outfit, Arial, sans-serif"
+    font-weight="800"
+    font-size="22"
+    letter-spacing="0.5"
+    fill="#ffffff"
+  >
+    GD
+  </text>
+</svg>
