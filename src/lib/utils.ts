@@ -93,6 +93,26 @@ export function monthKey(iso: string): string {
   return iso.slice(0, 7);
 }
 
+/** First day of a "YYYY-MM" key, as "YYYY-MM-DD". */
+export function startOfMonth(key: string): string {
+  return `${key}-01`;
+}
+
+/**
+ * Last day of a "YYYY-MM" key, as "YYYY-MM-DD".
+ *
+ * **Never hardcode this to `-31`.** September, April, June and November have 30
+ * days and February has 28/29, and Postgres rejects `2026-09-31` outright
+ * (error 22008 "date/time field value out of range") — which fails the whole
+ * query, not just that bound. Day 0 of the following month is the last day of
+ * this one, so the date object does the leap-year maths for us.
+ */
+export function endOfMonth(key: string): string {
+  const [y, m] = key.split("-").map(Number);
+  const lastDay = new Date(y, m, 0).getDate();
+  return `${key}-${String(lastDay).padStart(2, "0")}`;
+}
+
 /**
  * NOTE: the outstanding-report count used to live here as `countMissingReports`.
  * It moved into the database (`gd_report_status`, migration 012) so the GD page

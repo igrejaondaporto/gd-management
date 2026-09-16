@@ -7,7 +7,7 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { AddPeopleSheet, type AddedPeople } from "./AddPeopleSheet";
 import { useAddWeekAttendance } from "@/hooks/useWeeks";
 import { supabase } from "@/lib/supabaseClient";
-import { monthKey } from "@/lib/utils";
+import { endOfMonth, monthKey, startOfMonth } from "@/lib/utils";
 import { categoryColors, colors } from "@/lib/constants";
 import type { Week, Category, Person } from "@/types";
 
@@ -66,18 +66,23 @@ function useMonthAttendance(gdId: string | undefined, mKey: string) {
     queryKey: ["monthAttendance", gdId, mKey],
     queryFn: async (): Promise<{ weekCount: number; personCounts: Record<string, number> }> => {
       if (!gdId) return { weekCount: 0, personCounts: {} };
-      const { data: monthWeeks } = await supabase
+      const { data: monthWeeks, error: weeksErr } = await supabase
         .from("weeks")
         .select("id")
         .eq("gd_id", gdId)
-        .gte("date", `${mKey}-01`)
-        .lte("date", `${mKey}-31`);
+        .gte("date", startOfMonth(mKey))
+        .lte("date", endOfMonth(mKey));
+      // Throw rather than return zeros: a failed query used to render a
+      // confident "0/0", which is exactly how the invalid `-31` bound survived
+      // unnoticed through every 30-day month.
+      if (weeksErr) throw weeksErr;
       if (!monthWeeks?.length) return { weekCount: 0, personCounts: {} };
       const weekIds = monthWeeks.map((w) => w.id);
-      const { data: att } = await supabase
+      const { data: att, error: attErr } = await supabase
         .from("attendance")
         .select("person_id")
         .in("week_id", weekIds);
+      if (attErr) throw attErr;
       const counts: Record<string, number> = {};
       (att || []).forEach((a) => {
         counts[a.person_id] = (counts[a.person_id] || 0) + 1;

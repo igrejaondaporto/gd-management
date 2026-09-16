@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
+import { endOfMonth, startOfMonth } from "@/lib/utils";
 import type { Category } from "@/types";
 
 export interface WeekStats {
@@ -50,8 +51,8 @@ export function useMonthPersonAttendance(gdId: string | undefined, monthKey: str
         .from("weeks")
         .select("id, date")
         .eq("gd_id", gdId)
-        .gte("date", `${monthKey}-01`)
-        .lte("date", `${monthKey}-31`);
+        .gte("date", startOfMonth(monthKey))
+        .lte("date", endOfMonth(monthKey));
 
       if (weekErr || !monthWeeks?.length) return {} as Record<string, number>;
 

@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ClipboardList } from "lucide-react";
 import { MiniStat } from "@/components/ui/MiniStat";
-import { monthKey } from "@/lib/utils";
+import { endOfMonth, monthKey, startOfMonth } from "@/lib/utils";
 import { supabase } from "@/lib/supabaseClient";
 import { MONTHS_PT, colors } from "@/lib/constants";
 import type { Person, Week } from "@/types";
@@ -37,12 +37,13 @@ function useMonthStats(gdId: string | undefined, mKey: string) {
     queryKey: ["monthStats", gdId, mKey],
     queryFn: async () => {
       if (!gdId) return { weekCount: 0, avg: 0 };
-      const { data: monthWeeks } = await supabase
+      const { data: monthWeeks, error: weeksErr } = await supabase
         .from("weeks")
         .select("id")
         .eq("gd_id", gdId)
-        .gte("date", `${mKey}-01`)
-        .lte("date", `${mKey}-31`);
+        .gte("date", startOfMonth(mKey))
+        .lte("date", endOfMonth(mKey));
+      if (weeksErr) throw weeksErr;
       if (!monthWeeks?.length) return { weekCount: 0, avg: 0 };
 
       let total = 0;

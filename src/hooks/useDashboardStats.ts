@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
 import { MONTHS_PT } from "@/lib/constants";
+import { endOfMonth, startOfMonth } from "@/lib/utils";
 import type { Category } from "@/types";
 
 export interface MonthlyPoint {
@@ -17,11 +18,6 @@ export interface DashboardStats {
   attendanceTotal: number;
   newMembers: number;
   perMonth: MonthlyPoint[];
-}
-
-function endOfMonth(date: string): string {
-  const [y, m] = date.split("-").map(Number);
-  return `${y}-${String(m).padStart(2, "0")}-${String(new Date(y, m, 0).getDate()).padStart(2, "0")}`;
 }
 
 function monthKeyFromDate(date: string): string {
@@ -49,7 +45,7 @@ export function useDashboardStats(
       const finalGdIds = [...linkedGdIds];
 
       const endDate = endOfMonth(endKey);
-      const startDate = `${startKey}-01`;
+      const startDate = startOfMonth(startKey);
 
       // ── Absolutes (all people) ──
       let peopleQuery = supabase
