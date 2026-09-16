@@ -1,12 +1,9 @@
 ---
 nav_order: 2
 title: Primeiro acesso
-title: Primeiro acesso
 ---
 
 # Primeiro acesso
-
-![Ecrã de entrada](imagens/seus-grupos.png)
 
 ## 1. Entrar com o Google
 
@@ -27,6 +24,8 @@ Se demorar mais de um dia, avisa o teu supervisor.
 ## 3. Já dentro
 
 Assim que fores aprovado, ao entrares vais ver a lista **Seus grupos**.
+
+![Lista "Seus grupos" com os GDs a que estás vinculado](imagens/seus-grupos.png)
 
 Se a lista estiver vazia, aparece a mensagem *"Você ainda não está vinculado a um GD"*. Isso quer
 dizer que **já tens acesso, mas ainda não foste ligado a nenhum grupo** — pede ao teu supervisor para

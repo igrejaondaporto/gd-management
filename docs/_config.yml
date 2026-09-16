@@ -33,5 +33,11 @@ back_to_top_text: "Voltar ao topo"
 # No "Edit this page" link — the docs are for the team, not for contributors.
 gh_edit_link: false
 
+# O que sai do site publicado.
+# `imagens/` fica de fora do exclude: são as capturas que as páginas mostram.
+# `COMO-PUBLICAR.md` é nota interna de manutenção, não é para os utilizadores.
 exclude:
-  - "imagens/"
+  - "COMO-PUBLICAR.md"
+  - "Gemfile"
+  - "Gemfile.lock"
+  - "vendor/"

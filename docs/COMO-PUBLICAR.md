@@ -20,6 +20,21 @@ A partir daí, alterações a estes ficheiros publicam-se sozinhas quando entram
 O tema é o [just-the-docs](https://just-the-docs.com/), declarado em `_config.yml`. Dá a barra
 lateral com a ordem das páginas (cada página tem um `nav_order` no cabeçalho) e pesquisa.
 
+### Duas armadilhas que já custaram uma publicação
+
+Nenhuma das duas dá erro. O site publica-se, só fica incompleto.
+
+1. **Ficheiro começado por `_` não é publicado.** O Jekyll reserva esse prefixo e ignora o ficheiro
+   por completo — não há aviso no build. A página pai dos supervisores chamava-se
+   `_supervisores.md`; como o pai desaparecia, os quatro filhos (`painel`, `saude-do-gd`,
+   `gerir-gds`, `gerir-usuarios`) ficaram órfãos e **sumiram da barra lateral**, apesar de os
+   ficheiros estarem lá. Se uma secção inteira desaparecer do menu, é isto.
+
+2. **`exclude:` no `_config.yml` também apaga imagens.** Estava lá `imagens/`, e as 12 capturas
+   ficaram em 404 com as páginas a apontar para elas. O `exclude` serve só para o que não é para
+   publicar (`COMO-PUBLICAR.md`, este ficheiro). Se uma imagem nova não aparecer, é o primeiro
+   sítio a olhar.
+
 ## Ver localmente
 
 ```bash
