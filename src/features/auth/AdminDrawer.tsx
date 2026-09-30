@@ -1,8 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
-import { Settings, X, Users, Church, ChevronRight } from "lucide-react";
+import { Settings, X, Users, Church, ChevronRight, ArrowLeftRight } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
+
+/** The pastors also use the Painel Pastoral (pastoral.igrejaonda.pt, repo
+ *  `igrejaondaporto/portal-onda`), which has the same switch back to here.
+ *  It is a different app with its own login (PIN, Firebase), so this is
+ *  just a link — no shared session. */
+const PAINEL_PASTORAL_URL = "https://pastoral.igrejaonda.pt";
 
 const ADMIN_LINKS = [
   { path: "/pastor/users", label: "Gerir usuários", icon: <Users size={18} /> },
@@ -99,6 +105,22 @@ export function AdminDrawer() {
                   <ChevronRight size={16} className="shrink-0 text-ink-faint" />
                 </button>
               ))}
+
+              {profile?.role === "pastor" && (
+                <a
+                  href={PAINEL_PASTORAL_URL}
+                  className="flex w-full items-center gap-3 rounded-2xl border border-line bg-card px-4 py-3.5 text-left no-underline transition-colors active:bg-paper-alt"
+                >
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
+                    <ArrowLeftRight size={18} />
+                  </span>
+                  <span className="flex-1 font-body text-[14.5px] font-semibold text-ink">
+                    Ir para o Painel Pastoral
+                    <span className="block text-[12px] font-normal text-ink-faint">pastoral.igrejaonda.pt</span>
+                  </span>
+                  <ChevronRight size={16} className="shrink-0 text-ink-faint" />
+                </a>
+              )}
             </div>
           </div>
         </>,
