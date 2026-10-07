@@ -6,3 +6,4 @@ export { default as GdManagementPage } from "./GdManagementPage";
 export { default as ReportsPage } from "./ReportsPage";
 export { default as PeoplePage } from "./PeoplePage";
 export { default as GdDetailPage } from "./GdDetailPage";
+export { default as GdRequestsPage } from "./GdRequestsPage";

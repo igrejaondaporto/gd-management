@@ -9,6 +9,7 @@ import {
   ReportsPage,
   GdDetailPage,
   PeoplePage,
+  GdRequestsPage,
 } from "@/pages";
 import { ProtectedRoute } from "./ProtectedRoute";
 
@@ -62,6 +63,16 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["supervisor", "pastor"]}>
             <GdManagementPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Requests to join a GD, from the Portal's membership form */}
+      <Route
+        path="/pedidos"
+        element={
+          <ProtectedRoute allowedRoles={["supervisor", "pastor"]}>
+            <GdRequestsPage />
           </ProtectedRoute>
         }
       />

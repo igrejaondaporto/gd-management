@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
-import { Settings, X, Users, Church, ChevronRight, ArrowLeftRight } from "lucide-react";
+import { Settings, X, Users, Church, ChevronRight, ArrowLeftRight, UserPlus } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 
 /** The pastors also use the Painel Pastoral (pastoral.igrejaonda.pt, repo
@@ -11,6 +11,7 @@ import { useProfile } from "@/hooks/useProfile";
 const PAINEL_PASTORAL_URL = "https://pastoral.igrejaonda.pt";
 
 const ADMIN_LINKS = [
+  { path: "/pedidos", label: "Pedidos de GD", icon: <UserPlus size={18} /> },
   { path: "/pastor/users", label: "Gerir usuários", icon: <Users size={18} /> },
   { path: "/pastor/gds", label: "Gerir grupos", icon: <Church size={18} /> },
 ];

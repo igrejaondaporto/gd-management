@@ -39,3 +39,5 @@ export { useLeaderGd, useFirstLeaderGd } from "./useLeaderGd";
 export type { LeaderGd } from "./useLeaderGd";
 export { useWeekStats, useMonthPersonAttendance } from "./useWeekStats";
 export type { WeekStats } from "./useWeekStats";
+export { useGdRequests, useAssignGdRequest, useSetGdRequestStatus } from "./useGdRequests";
+export type { GdRequest } from "./useGdRequests";
