@@ -30,6 +30,8 @@ src/
     auth/             AuthProvider, AdminDrawer
     pastor/components UserList, StaffSection
     attendance/       AttendanceFlow, LeaderHome, WeeklySummary, GdPicker + 5 step components
+    requests/         "Pedidos de GD" (migration 015): GdRequestsPanel (/pedidos, supervisor/pastor
+                      routes each request to a GD), LeaderGdRequests (leader home card), AssignGdSheet
     status/           "Saúde do GD": GdHealthSection (GD page, editable) + StatusUpdateSheet
                       + GdHealthPill + GdHealthPanel/GdHealthSheet (dashboard, read-only)
     dashboard/        PastorHome (month + team filters, stats, report status, GD health)
@@ -70,7 +72,7 @@ Roles are **global per user** (`profiles.role`), not per-GD. A pastor/supervisor
 
 ## Database Schema
 
-7 tables: `profiles`, `gds`, `gd_staff`, `people`, `weeks`, `attendance`, `gd_status_updates`.
+8 tables: `profiles`, `gds`, `gd_staff`, `people`, `weeks`, `attendance`, `gd_status_updates`, `gd_requests` (+ `integration_keys`, invisible to clients).
 
 - `profiles` — mirrors `auth.users`, adds `status` (pending/approved/rejected) and `role`.
 - `gds` — groups of disciples. Has `weekday` (0-6, 0 = Sunday, matching JS `Date.getDay()`) and `start_time` (`time`, serialised as `"HH:MM:SS"` — use `formatTime()`) describing when the group meets. Both nullable — null means not set.
@@ -79,6 +81,7 @@ Roles are **global per user** (`profiles.role`), not per-GD. A pastor/supervisor
 - `weeks` — one row per GD per week (`unique(gd_id, date)`).
 - `attendance` — links weeks to people. Has `category_at_time` to preserve historical category.
 - `gd_status_updates` — **append-only** log of a supervisor's assessment of a GD (`good`/`attention`/`bad`). There is no "current status" column or table: the current status is the newest row and the history is every row, so the two can never disagree. A `before insert` trigger sets `created_by`/`created_by_name`/`created_at` server-side so the author cannot be forged. **The newest row may be edited by its author** (to fix a typo without faking a new assessment); older rows are frozen. There is no DELETE policy at all.
+- `gd_requests` — requests to join a GD sent by the Portal do Voluntário (`portal-onda`, membership form → "Quero entrar num GD"). **No write policy at all**: the Portal submits through `submit_gd_request` (anon key + a shared secret whose SHA-256 is in `integration_keys`; the secret itself lives only in the Portal's Firestore), a supervisor/pastor routes it with `assign_gd_request`, and the GD's staff mark `contacted`/`joined`/`declined` with `set_gd_request_status` (`joined` can add the person to `people` as a visitor, once). The Portal reads the status back with `gd_request_statuses`. RLS: supervisors/pastors read all, a GD's staff read the ones sent to that GD.
 
 ### Key RPCs
 

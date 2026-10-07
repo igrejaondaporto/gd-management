@@ -169,3 +169,14 @@ export function initials(name: string): string {
   const parts = name.trim().split(/\s+/);
   return ((parts[0]?.[0] || "") + (parts[1]?.[0] || "")).toUpperCase();
 }
+
+/** WhatsApp link for a phone as people type it ("912 345 678", "+351…",
+ *  "+55 11…"). A 9-digit number is Portuguese, so it gets 351 in front;
+ *  anything else is assumed to already carry its country code. */
+export function whatsappLink(phone: string | null | undefined): string | null {
+  const digits = String(phone ?? "")
+    .replace(/\D/g, "")
+    .replace(/^00/, "");
+  if (digits.length < 9) return null;
+  return `https://wa.me/${digits.length === 9 ? `351${digits}` : digits}`;
+}

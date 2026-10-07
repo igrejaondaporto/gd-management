@@ -5,11 +5,13 @@ import { AdminNav } from "@/components/AdminNav";
 import { GdPicker } from "@/features/attendance/components/GdPicker";
 import { GdStatusSummary } from "@/features/status";
 import { PastorHome } from "@/features/dashboard";
+import { GdRequestsBanner, LeaderGdRequests } from "@/features/requests";
 import { AdminDrawer } from "@/features/auth";
 import { useLeaderGd } from "@/hooks/useLeaderGd";
 import { useProfile } from "@/hooks/useProfile";
 import { useGdHealthOverview } from "@/hooks/useGdStatus";
 import { useReportStatus } from "@/hooks/useReportStatus";
+import { useGdRequests, useSetGdRequestStatus } from "@/hooks/useGdRequests";
 
 type AdminTab = "home" | "gds";
 
@@ -33,6 +35,13 @@ export default function HomePage() {
   // Grupos reuses the cache instead of refetching the same rows.
   const { data: health = {} } = useGdHealthOverview(null, isAdmin);
   const { data: reportStatus } = useReportStatus(null, 30, isAdmin);
+
+  // Requests to join a GD (migration 015). RLS scopes them: everything for a
+  // supervisor/pastor (the banner counts the unrouted ones), only their own
+  // GDs' for a leader (the card above the GD list).
+  const { data: requests = [] } = useGdRequests(!!profile);
+  const setRequestStatus = useSetGdRequestStatus();
+  const unrouted = requests.filter((r) => r.status === "new").length;
 
   const badges = useMemo(() => {
     const map: Record<string, import("react").ReactNode> = {};
@@ -65,11 +74,21 @@ export default function HomePage() {
                 </p>
               </div>
             ) : (
-              <GdPicker
-                gds={leaderGds}
-                selectedGdId={null}
-                onSelect={(gd) => navigate(`/gd/${gd.gdId}`)}
-              />
+              <>
+                <LeaderGdRequests
+                  requests={requests}
+                  multipleGds={leaderGds.length > 1}
+                  saving={setRequestStatus.isPending}
+                  onSetStatus={(id, status, addPerson) =>
+                    setRequestStatus.mutateAsync({ id, status, addPerson })
+                  }
+                />
+                <GdPicker
+                  gds={leaderGds}
+                  selectedGdId={null}
+                  onSelect={(gd) => navigate(`/gd/${gd.gdId}`)}
+                />
+              </>
             )}
           </div>
         </PhoneFrame>
@@ -92,7 +111,12 @@ export default function HomePage() {
               <div className="h-6 w-6 animate-spin rounded-full border-[2.5px] border-primary border-t-transparent" />
             </div>
           ) : adminTab === "home" ? (
-            <PastorHome />
+            <>
+              <div className="px-5 pt-4 empty:hidden">
+                <GdRequestsBanner count={unrouted} onOpen={() => navigate("/pedidos")} />
+              </div>
+              <PastorHome />
+            </>
           ) : leaderGds.length === 0 ? (
             <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gold-soft">

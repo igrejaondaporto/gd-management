@@ -98,3 +98,19 @@ export type GdStatus = keyof typeof GD_STATUS;
 
 /** Display order, best → worst, used by the picker. */
 export const GD_STATUS_ORDER: GdStatus[] = ["good", "attention", "bad"];
+
+/**
+ * Where a request to join a GD is (migration 015). Keys mirror the DB
+ * `check` constraint on `gd_requests.status`; labels are what both the
+ * supervisor list and the leader card show — and what the Painel Pastoral
+ * (portal-onda) reads back, so keep the meaning of each key stable.
+ */
+export const GD_REQUEST_STATUS = {
+  new: { label: "Por encaminhar", tone: "warning" },
+  assigned: { label: "Encaminhado", tone: "default" },
+  contacted: { label: "Contactado", tone: "default" },
+  joined: { label: "Entrou", tone: "success" },
+  declined: { label: "Não deu", tone: "danger" },
+} as const;
+
+export type GdRequestStatus = keyof typeof GD_REQUEST_STATUS;

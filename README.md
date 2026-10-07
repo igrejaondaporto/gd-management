@@ -39,7 +39,7 @@ Required variables:
    - Under "Authorized Client IDs", the redirect URL is:
      `https://waeopvgoeadyrplrfuzk.supabase.co/auth/v1/callback`
    - Add this same URL to **Authorized redirect URIs** in your Google Cloud Console
-3. Run the SQL migrations from `supabase/migrations/` (already applied: 001–014)
+3. Run the SQL migrations from `supabase/migrations/` (already applied: 001–014; **015 — pedidos de GD — still to run** in the SQL editor)
 
 ### Dev
 
