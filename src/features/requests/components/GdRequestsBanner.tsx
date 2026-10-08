@@ -14,10 +14,10 @@ export function GdRequestsBanner({ count, onOpen }: { count: number; onOpen: () 
       </span>
       <span className="min-w-0 flex-1">
         <span className="block font-display text-[15px] font-bold tracking-[-0.02em] text-ink">
-          {count === 1 ? "1 pedido de GD por encaminhar" : `${count} pedidos de GD por encaminhar`}
+          {count === 1 ? "1 pedido de GD novo" : `${count} pedidos de GD novos`}
         </span>
         <span className="block font-body text-[12px] text-ink-soft">
-          Querem entrar num GD — escolhe o GD de cada um
+          Querem entrar num GD — ninguém pegou ainda
         </span>
       </span>
       <ChevronRight size={16} className="shrink-0 text-ink-faint" />

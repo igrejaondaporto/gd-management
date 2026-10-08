@@ -12,7 +12,7 @@ interface LeaderGdRequestsProps {
   saving: boolean;
   onSetStatus: (
     id: string,
-    status: Exclude<GdRequestStatus, "new">,
+    status: Exclude<GdRequestStatus, "new" | "claimed">,
     addPerson?: boolean,
   ) => Promise<unknown>;
 }
