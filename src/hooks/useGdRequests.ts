@@ -10,11 +10,20 @@ export interface GdRequest {
   concelho: string | null;
   age: number | null;
   maritalStatus: string | null;
+  /** Region of the Portal ("norte", "lisboa"…) — migration 016. */
+  region: string | null;
+  hasChildren: boolean | null;
+  /** "2 · 3 e 5 anos", as the form collected it. */
+  childrenNote: string | null;
   notes: string | null;
   gdId: string | null;
   gdName: string | null;
   status: GdRequestStatus;
   personId: string | null;
+  /** The supervisor dealing with it (migration 016). */
+  claimedById: string | null;
+  claimedByName: string | null;
+  claimedAt: string | null;
   assignedByName: string | null;
   assignedAt: string | null;
   statusByName: string | null;
@@ -30,11 +39,17 @@ interface Row {
   concelho: string | null;
   age: number | null;
   marital_status: string | null;
+  region: string | null;
+  has_children: boolean | null;
+  children_note: string | null;
   notes: string | null;
   gd_id: string | null;
   gds: { name: string } | null;
   status: GdRequestStatus;
   person_id: string | null;
+  claimed_by: string | null;
+  claimed_by_name: string | null;
+  claimed_at: string | null;
   assigned_by_name: string | null;
   assigned_at: string | null;
   status_by_name: string | null;
@@ -43,7 +58,7 @@ interface Row {
 }
 
 const COLUMNS =
-  "id, name, phone, email, concelho, age, marital_status, notes, gd_id, gds:gd_id(name), status, person_id, assigned_by_name, assigned_at, status_by_name, status_at, created_at";
+  "id, name, phone, email, concelho, age, marital_status, region, has_children, children_note, notes, gd_id, gds:gd_id(name), status, person_id, claimed_by, claimed_by_name, claimed_at, assigned_by_name, assigned_at, status_by_name, status_at, created_at";
 
 function mapRow(r: Row): GdRequest {
   return {
@@ -54,11 +69,17 @@ function mapRow(r: Row): GdRequest {
     concelho: r.concelho,
     age: r.age,
     maritalStatus: r.marital_status,
+    region: r.region,
+    hasChildren: r.has_children,
+    childrenNote: r.children_note,
     notes: r.notes,
     gdId: r.gd_id,
     gdName: r.gds?.name ?? null,
     status: r.status,
     personId: r.person_id,
+    claimedById: r.claimed_by,
+    claimedByName: r.claimed_by_name,
+    claimedAt: r.claimed_at,
     assignedByName: r.assigned_by_name,
     assignedAt: r.assigned_at,
     statusByName: r.status_by_name,
@@ -90,6 +111,32 @@ export function useGdRequests(enabled = true) {
   });
 }
 
+/** A supervisor takes a new request: "I'm dealing with this one" — the
+ *  others see it as "A tratar · <name>" and only they pick the GD. */
+export function useClaimGdRequest() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.rpc("claim_gd_request", { p_id: id });
+      if (error) throw error;
+    },
+    // also on error: "someone else took it" should refresh the list
+    onSettled: () => qc.invalidateQueries({ queryKey: ["gdRequests"] }),
+  });
+}
+
+/** Hand a taken request back to the inbox. */
+export function useReleaseGdRequest() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.rpc("release_gd_request", { p_id: id });
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["gdRequests"] }),
+  });
+}
+
 /** Supervisor/pastor sends a request to a GD (`null` = back to unrouted). */
 export function useAssignGdRequest() {
   const qc = useQueryClient();
@@ -115,7 +162,7 @@ export function useSetGdRequestStatus() {
       addPerson = false,
     }: {
       id: string;
-      status: Exclude<GdRequestStatus, "new">;
+      status: Exclude<GdRequestStatus, "new" | "claimed">;
       addPerson?: boolean;
     }) => {
       const { error } = await supabase.rpc("set_gd_request_status", {

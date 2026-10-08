@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { GdRequestStatus } from "@/lib/constants";
 import type { GdRequest } from "@/hooks/useGdRequests";
 
-type NextStatus = Exclude<GdRequestStatus, "new">;
+type NextStatus = Exclude<GdRequestStatus, "new" | "claimed">;
 
 interface GdRequestActionsProps {
   request: GdRequest;

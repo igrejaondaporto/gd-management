@@ -106,7 +106,8 @@ export const GD_STATUS_ORDER: GdStatus[] = ["good", "attention", "bad"];
  * (portal-onda) reads back, so keep the meaning of each key stable.
  */
 export const GD_REQUEST_STATUS = {
-  new: { label: "Por encaminhar", tone: "warning" },
+  new: { label: "Novo", tone: "warning" },
+  claimed: { label: "A tratar", tone: "default" },
   assigned: { label: "Encaminhado", tone: "default" },
   contacted: { label: "Contactado", tone: "default" },
   joined: { label: "Entrou", tone: "success" },
