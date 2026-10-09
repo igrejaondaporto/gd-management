@@ -125,12 +125,14 @@ begin
 end;
 $$;
 
--- The Portal now also sends region and children. The old 9-argument
--- version is dropped so PostgREST never has two candidates to choose from.
+-- The Portal now also sends region and children. The old 9-argument version is
+-- dropped so PostgREST never has two candidates to choose from; the new one
+-- takes `p_source` (the partner identity from the verified JWT) instead of the
+-- old shared secret.
 drop function if exists submit_gd_request(text, text, text, text, text, text, int, text, text);
 
 create or replace function submit_gd_request(
-  p_key text,
+  p_source text,
   p_ref text,
   p_name text,
   p_phone text default null,
@@ -151,8 +153,8 @@ as $$
 declare
   v_row gd_requests;
 begin
-  if not gd_integration_key_ok(p_key) then
-    raise exception 'invalid integration key' using errcode = '28000';
+  if coalesce(p_source, '') !~ '^[a-z0-9][a-z0-9_-]{0,59}$' then
+    raise exception 'invalid source' using errcode = '22023';
   end if;
   if coalesce(btrim(p_ref), '') = '' or length(p_ref) > 120 then
     raise exception 'invalid ref' using errcode = '22023';
@@ -161,9 +163,10 @@ begin
     raise exception 'invalid name' using errcode = '22023';
   end if;
 
-  insert into gd_requests (source_ref, name, phone, email, concelho, age, marital_status, notes,
+  insert into gd_requests (source, source_ref, name, phone, email, concelho, age, marital_status, notes,
                            region, has_children, children_note)
   values (
+    p_source,
     btrim(p_ref),
     left(btrim(p_name), 120),
     left(nullif(btrim(p_phone), ''), 40),
@@ -176,7 +179,9 @@ begin
     p_has_children,
     left(nullif(btrim(p_children_note), ''), 120)
   )
-  on conflict (source_ref) do update set
+  -- Contact fields only: routing, claim and status are deliberately absent so
+  -- a re-send cannot undo them.
+  on conflict (source, source_ref) do update set
     name = excluded.name,
     phone = excluded.phone,
     email = excluded.email,
@@ -193,5 +198,10 @@ begin
   return jsonb_build_object('id', v_row.id, 'status', v_row.status);
 end;
 $$;
-revoke execute on function submit_gd_request(text, text, text, text, text, text, int, text, text, text, boolean, text) from public;
-grant execute on function submit_gd_request(text, text, text, text, text, text, int, text, text, text, boolean, text) to anon;
+revoke execute on function submit_gd_request(text, text, text, text, text, text, int, text, text, text, boolean, text)
+  from public, anon, authenticated;
+grant execute on function submit_gd_request(text, text, text, text, text, text, int, text, text, text, boolean, text)
+  to service_role;
+
+-- Let PostgREST drop the stale (previously `anon`-callable) function visibility now.
+notify pgrst, 'reload schema';

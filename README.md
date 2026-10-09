@@ -39,7 +39,8 @@ Required variables:
    - Under "Authorized Client IDs", the redirect URL is:
      `https://waeopvgoeadyrplrfuzk.supabase.co/auth/v1/callback`
    - Add this same URL to **Authorized redirect URIs** in your Google Cloud Console
-3. Run the SQL migrations from `supabase/migrations/` (already applied: 001–014; **015 — pedidos de GD — still to run** in the SQL editor)
+3. Run the SQL migrations from `supabase/migrations/` (already applied: 001–014) in the SQL editor
+4. **Deploy the `gd-requests` Edge Function** — see [Integrations](#integrations)
 
 ### Dev
 
@@ -61,6 +62,34 @@ pnpm preview
 ```bash
 pnpm lint
 ```
+
+## Integrations
+
+Third-party systems (starting with the Portal do Voluntário) create and read GD
+requests by calling the `gd-requests` Edge Function — they never touch the
+database directly. Each partner authenticates with a static key sent in the
+`x-api-key` header. The keys are Edge Function secrets, one per partner:
+
+```bash
+supabase link --project-ref waeopvgoeadyrplrfuzk
+supabase functions deploy gd-requests        # verify_jwt is off (see supabase/config.toml)
+
+# One secret per partner: `source` is what the database stores, `scopes` what the
+# partner may do. Takes effect immediately — no redeploy.
+supabase secrets set PARTNER_PORTAL_ONDA='{"source":"portal-onda","key":"<chave>","scopes":["gd_requests:read","gd_requests:write"]}'
+```
+
+Adding a partner, rotating a key, or granting a new permission is a secret
+change, not a code change. The DB functions behind the endpoint
+(`submit_gd_request`, `gd_request_statuses`) are granted to `service_role` only —
+not to `anon` or `authenticated`.
+
+The endpoint contract for partners is in
+[`supabase/functions/gd-requests/README.md`](supabase/functions/gd-requests/README.md)
+(Portuguese). Partners must call it **server-to-server** — their Cloud Function,
+server or cron, never a browser or app — and keep the key in their platform's
+secret manager. The endpoint has open CORS and does not validate origin, so a key
+that reaches a client bundle can be copied and used to write as that partner.
 
 ## Documentation
 

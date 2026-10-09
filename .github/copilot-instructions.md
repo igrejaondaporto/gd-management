@@ -68,11 +68,12 @@ Roles are **global per user** (`profiles.role`), not per-GD. A pastor/supervisor
 - **`auth_role()` helper** — a `SECURITY DEFINER` function that reads the user's role from `profiles` without causing infinite recursion in policies.
 - **Frontend guards are UX only** — `ProtectedRoute` checks roles for convenience, but the database is the authoritative source.
 - **Supabase anon key is public** — permissions come from the user's JWT + RLS, not from hiding the key.
+- **The integration surface is not the anon key** — third-party partners call the `gd-requests` Edge Function with a static per-partner key (`x-api-key`), and the RPCs behind it are `service_role`-only. Never hand a partner a secret API key: it maps to `service_role` and bypasses every RLS policy.
 - **Never expose personal data** — no analytics on people's names, no logging PII.
 
 ## Database Schema
 
-8 tables: `profiles`, `gds`, `gd_staff`, `people`, `weeks`, `attendance`, `gd_status_updates`, `gd_requests` (+ `integration_keys`, invisible to clients).
+8 tables: `profiles`, `gds`, `gd_staff`, `people`, `weeks`, `attendance`, `gd_status_updates`, `gd_requests`.
 
 - `profiles` — mirrors `auth.users`, adds `status` (pending/approved/rejected) and `role`.
 - `gds` — groups of disciples. Has `weekday` (0-6, 0 = Sunday, matching JS `Date.getDay()`) and `start_time` (`time`, serialised as `"HH:MM:SS"` — use `formatTime()`) describing when the group meets. Both nullable — null means not set.
@@ -81,7 +82,7 @@ Roles are **global per user** (`profiles.role`), not per-GD. A pastor/supervisor
 - `weeks` — one row per GD per week (`unique(gd_id, date)`).
 - `attendance` — links weeks to people. Has `category_at_time` to preserve historical category.
 - `gd_status_updates` — **append-only** log of a supervisor's assessment of a GD (`good`/`attention`/`bad`). There is no "current status" column or table: the current status is the newest row and the history is every row, so the two can never disagree. A `before insert` trigger sets `created_by`/`created_by_name`/`created_at` server-side so the author cannot be forged. **The newest row may be edited by its author** (to fix a typo without faking a new assessment); older rows are frozen. There is no DELETE policy at all.
-- `gd_requests` — requests to join a GD sent by the Portal do Voluntário (`portal-onda`, membership form → "Quero entrar num GD"). **No write policy at all**: the Portal submits through `submit_gd_request` (anon key + a shared secret whose SHA-256 is in `integration_keys`; the secret itself lives only in the Portal's Firestore), a supervisor/pastor routes it with `assign_gd_request`, and the GD's staff mark `contacted`/`joined`/`declined` with `set_gd_request_status` (`joined` can add the person to `people` as a visitor, once). The Portal reads the status back with `gd_request_statuses`. RLS: supervisors/pastors read all, a GD's staff read the ones sent to that GD.
+- `gd_requests` — requests to join a GD sent by third-party partners (`portal-onda` = the Portal do Voluntário's membership form → "Quero entrar num GD"). **No write policy at all.** Partners call the `gd-requests` Edge Function (`supabase/functions/gd-requests`) with a static key in the `x-api-key` header. Each key is a function secret (`PARTNER_*`) holding `{source, key, scopes}`; the function resolves the key to the partner's `source` before touching the database, and — holding the `service_role` key — is the only caller of `submit_gd_request` / `gd_request_statuses`, granted to `service_role` and to nobody else (not `anon`, not `authenticated`). A supervisor/pastor routes a request with `assign_gd_request`, and the GD's staff mark `contacted`/`joined`/`declined` with `set_gd_request_status` (`joined` can add the person to `people` as a visitor, once). Rows are keyed by `(source, source_ref)`, and a partner's `source` always comes from its key's secret, never from the request body. RLS: supervisors/pastors read all, a GD's staff read the ones sent to that GD.
 
 ### Key RPCs
 
@@ -130,7 +131,8 @@ Vercel deploys on push to `main`. SPA routing handled by `vercel.json` rewrite r
 ## Supabase
 
 Project: `https://waeopvgoeadyrplrfuzk.supabase.co`
-Migrations: `supabase/migrations/` (001–014)
+Migrations: `supabase/migrations/` (001–016)
+Edge Functions: `supabase/functions/` (deploy with `supabase functions deploy gd-requests`; partner keys are `supabase secrets set PARTNER_*`)
 Google OAuth configured in Auth → Providers.
 
 ## Key files to update when adding features
@@ -140,3 +142,4 @@ Google OAuth configured in Auth → Providers.
 - New UI component → `src/components/ui/`, `src/components/ui/index.ts`
 - New feature → `src/features/<domain>/components/`, `src/features/<domain>/index.ts`
 - DB changes → `supabase/migrations/` + run in Supabase SQL Editor
+- Edge Function changes → `supabase/functions/` + `supabase functions deploy <name>`

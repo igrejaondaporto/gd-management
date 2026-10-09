@@ -1,0 +1,15 @@
+project_id = "smart-gd-report"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[functions.gd-requests]
+# Partners authenticate with their own API key in the `x-api-key` header, not a
+# Supabase JWT — so the platform-level check must be off, and the function
+# authenticates every request itself (see index.ts). This is what makes the
+# endpoint public: never remove the in-function key check.
+verify_jwt = false

@@ -4,14 +4,14 @@
 -- (membro.igrejaonda.pt, repo `igrejaondaporto/portal-onda`) can ask for help
 -- finding a GD. Until now that request stopped at the pastoral team. Now:
 --
---   1. the Portal sends it here (`submit_gd_request`, server to server);
+--   1. the Portal sends it here through the `gd-requests` Edge Function;
 --   2. a supervisor/pastor sees it under "Pedidos" and assigns a GD
 --      (`assign_gd_request`);
 --   3. the staff of that GD see it on their home screen, contact the person
 --      and mark how it went (`set_gd_request_status`) — "Entrou" can also add
 --      them to the GD's people as a visitor, so the first attendance is one
 --      tap;
---   4. the Portal reads the status back (`gd_request_statuses`), so the
+--   4. the Portal reads the status back through the same Edge Function, so the
 --      pastoral team sees where each request is without asking.
 --
 -- **Writes only go through the functions below**, never through the table:
@@ -20,18 +20,29 @@
 -- themselves — the same reason the role comes from `auth_role()` and the
 -- author name from `profiles`, never from the request body.
 --
--- The Portal calls with the anon key (public, it ships in this app's bundle)
--- plus a shared secret. Only the secret's SHA-256 lives here; the secret
--- itself lives in the Portal's Firestore (`config/gdIntegracao`, a document
--- no Firestore rule opens), so it is never in a repo, a chat or a screen.
--- Rotating it = a new hash here + a new secret there.
+-- ── the integration boundary ──
+-- Partners never reach these RPCs. They call the `gd-requests` Edge Function
+-- (`supabase/functions/gd-requests`) with a static per-partner API key, and the
+-- function — holding the `service_role` key — is the only caller of
+-- `submit_gd_request` / `gd_request_statuses`. Those two are granted to
+-- `service_role` and to nobody else (not `public`, not `anon`, not
+-- `authenticated`), so they are not part of the public PostgREST surface.
+--
+-- Each partner is one Edge Function secret (`PARTNER_*`) holding
+-- `{ "source": "<source>", "key": "<chave>", "scopes": [...] }`. The function
+-- resolves the presented key to its `source` and passes it here as `p_source`,
+-- which is never taken from the request body. A partner can therefore only ever
+-- touch rows carrying its own `source`. Adding a partner or rotating a key is a
+-- secret change (`supabase secrets set`), not a code change.
 
 create table if not exists gd_requests (
   id uuid primary key default gen_random_uuid(),
-  -- Where it came from and its id there (the membro's Firestore id) — the
-  -- unique key that makes a re-send update the request instead of duplicating.
-  source text not null default 'portal-onda',
-  source_ref text not null unique,
+  -- Which partner sent it ('portal-onda', …), taken from the authenticated
+  -- JWT — never from the request body.
+  source text not null,
+  -- Where it came from and its id there (the membro's Firestore id). Unique
+  -- per partner, not globally: two partners may legitimately use the same ref.
+  source_ref text not null,
   name text not null,
   phone text,
   email text,
@@ -52,11 +63,14 @@ create table if not exists gd_requests (
   status_by_name text,
   status_at timestamptz,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  -- The idempotency key the functions upsert on: one request per partner+ref.
+  constraint gd_requests_source_ref_key unique (source, source_ref)
 );
 
 create index if not exists gd_requests_gd_idx on gd_requests (gd_id, status);
 create index if not exists gd_requests_status_idx on gd_requests (status, created_at desc);
+create index if not exists gd_requests_source_idx on gd_requests (source, status);
 
 alter table gd_requests enable row level security;
 
@@ -75,37 +89,7 @@ create policy "read_gd_requests" on gd_requests
   );
 
 comment on table gd_requests is
-  'Requests to join a GD, sent by the Portal do Voluntário. Written only through the gd_request functions.';
-
--- ── shared secrets for server-to-server callers ──
--- RLS on and no policy: invisible to every client, readable only by the
--- security-definer functions below.
-create table if not exists integration_keys (
-  name text primary key,
-  secret_sha256 text not null,
-  created_at timestamptz not null default now()
-);
-alter table integration_keys enable row level security;
-revoke all on integration_keys from anon, authenticated;
-
-insert into integration_keys (name, secret_sha256)
-values ('portal-onda', 'ed9bda7b0cc22d4f2d260f7456dedda6afc8f2fdbd113e8b25b574b0b969c872')
-on conflict (name) do update set secret_sha256 = excluded.secret_sha256;
-
-create or replace function gd_integration_key_ok(p_key text)
-returns boolean
-language sql
-stable
-security definer
-set search_path = 'public'
-as $$
-  select exists (
-    select 1 from integration_keys
-    where name = 'portal-onda'
-      and secret_sha256 = encode(sha256(convert_to(coalesce(p_key, ''), 'UTF8')), 'hex')
-  );
-$$;
-revoke execute on function gd_integration_key_ok(text) from public, anon, authenticated;
+  'Requests to join a GD, sent by third-party partners through the gd-requests Edge Function. Written only through the gd_request functions (service_role).';
 
 create or replace function gd_actor_name()
 returns text
@@ -121,12 +105,14 @@ as $$
 $$;
 
 /**
- * The Portal sends (or re-sends) a request. Same `p_ref` = the same request:
- * the contact details are refreshed, the routing (GD, status) is kept — a
- * re-send must never undo what a supervisor already did.
+ * The Edge Function submits (or re-submits) a request on behalf of a partner.
+ * `p_source` is the partner identity taken from the verified JWT, never from
+ * the request body. Same `p_source` + `p_ref` = the same request: the contact
+ * details are refreshed, the routing (GD, status) is kept — a re-send must
+ * never undo what a supervisor already did.
  */
 create or replace function submit_gd_request(
-  p_key text,
+  p_source text,
   p_ref text,
   p_name text,
   p_phone text default null,
@@ -144,8 +130,8 @@ as $$
 declare
   v_row gd_requests;
 begin
-  if not gd_integration_key_ok(p_key) then
-    raise exception 'invalid integration key' using errcode = '28000';
+  if coalesce(p_source, '') !~ '^[a-z0-9][a-z0-9_-]{0,59}$' then
+    raise exception 'invalid source' using errcode = '22023';
   end if;
   if coalesce(btrim(p_ref), '') = '' or length(p_ref) > 120 then
     raise exception 'invalid ref' using errcode = '22023';
@@ -154,8 +140,9 @@ begin
     raise exception 'invalid name' using errcode = '22023';
   end if;
 
-  insert into gd_requests (source_ref, name, phone, email, concelho, age, marital_status, notes)
+  insert into gd_requests (source, source_ref, name, phone, email, concelho, age, marital_status, notes)
   values (
+    p_source,
     btrim(p_ref),
     left(btrim(p_name), 120),
     left(nullif(btrim(p_phone), ''), 40),
@@ -165,7 +152,9 @@ begin
     left(nullif(btrim(p_marital_status), ''), 40),
     left(nullif(btrim(p_notes), ''), 600)
   )
-  on conflict (source_ref) do update set
+  -- Contact fields only: routing, claim and status are deliberately absent so
+  -- a re-send cannot undo them.
+  on conflict (source, source_ref) do update set
     name = excluded.name,
     phone = excluded.phone,
     email = excluded.email,
@@ -179,12 +168,15 @@ begin
   return jsonb_build_object('id', v_row.id, 'status', v_row.status);
 end;
 $$;
-revoke execute on function submit_gd_request(text, text, text, text, text, text, int, text, text) from public;
-grant execute on function submit_gd_request(text, text, text, text, text, text, int, text, text) to anon;
+revoke execute on function submit_gd_request(text, text, text, text, text, text, int, text, text)
+  from public, anon, authenticated;
+grant execute on function submit_gd_request(text, text, text, text, text, text, int, text, text)
+  to service_role;
 
-/** Where each request is, for the Portal's "Querem entrar num GD" list.
- *  Only status and GD name go back — the Portal already has the rest. */
-create or replace function gd_request_statuses(p_key text, p_refs text[])
+/** Where each request is, for a partner's own list. Scoped to `p_source`, so
+ *  a partner can never read another partner's refs. Only status and GD name go
+ *  back — the partner already has the rest. `p_refs` null = the latest 1000. */
+create or replace function gd_request_statuses(p_source text, p_refs text[] default null)
 returns table (source_ref text, status text, gd_name text, status_by_name text, updated_at timestamptz)
 language plpgsql
 stable
@@ -192,19 +184,21 @@ security definer
 set search_path = 'public'
 as $$
 begin
-  if not gd_integration_key_ok(p_key) then
-    raise exception 'invalid integration key' using errcode = '28000';
+  if coalesce(p_source, '') !~ '^[a-z0-9][a-z0-9_-]{0,59}$' then
+    raise exception 'invalid source' using errcode = '22023';
   end if;
   return query
     select r.source_ref, r.status, g.name, r.status_by_name, r.updated_at
     from gd_requests r
     left join gds g on g.id = r.gd_id
-    where r.source_ref = any (coalesce(p_refs, '{}'::text[]))
+    where r.source = p_source
+      and (p_refs is null or r.source_ref = any (p_refs))
+    order by r.updated_at desc
     limit 1000;
 end;
 $$;
-revoke execute on function gd_request_statuses(text, text[]) from public;
-grant execute on function gd_request_statuses(text, text[]) to anon;
+revoke execute on function gd_request_statuses(text, text[]) from public, anon, authenticated;
+grant execute on function gd_request_statuses(text, text[]) to service_role;
 
 /** Supervisor/pastor routes a request to a GD (or back to "sem GD" with
  *  null). Re-routing resets the status: the new GD has not talked to them. */

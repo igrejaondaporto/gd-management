@@ -1,0 +1,4 @@
+{
+  "//": "Edge Functions (supabase/functions/) run on Deno, so Deno's globals (Deno.env, Deno.serve) are only known to the Deno language server. Requires the `denoland.vscode-deno` extension; without it the editor flags those globals as undefined (the app's tsconfig does not include this folder, so builds are unaffected).",
+  "deno.enablePaths": ["supabase/functions"]
+}
