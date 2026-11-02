@@ -104,6 +104,7 @@ correspondente devolve `403`.
 | ------------------- | -------------------- |
 | `gd_requests:read`  | `GET` (ler estados)  |
 | `gd_requests:write` | `POST` (criar pedido) |
+| `gds:read`          | `GET /gds` (ler a lista de GDs) |
 
 ## `POST` — criar ou actualizar um pedido
 
@@ -172,6 +173,27 @@ Estados possíveis (`status`):
 | `joined`    | Entrou no GD                         |
 | `declined`  | Não avançou                          |
 
+## `GET /gds` — ler a lista de GDs
+
+```
+GET /functions/v1/gd-requests/gds
+```
+
+Os GDs **ativos**, por ordem de nome. Só nome e horário — nenhuma pessoa, nenhum
+líder. Serve para o parceiro ter a mesma lista de GDs que o painel (por exemplo,
+depois de um GD multiplicar), sem a escrever à mão.
+
+```json
+{
+  "gds": [
+    { "id": "6f1c…", "name": "Gaia", "weekday": 2, "startTime": "20:30" }
+  ]
+}
+```
+
+`weekday`: 0 = domingo … 6 = sábado; `weekday` e `startTime` podem vir a `null`
+(ainda não definidos no painel).
+
 ## Erros
 
 | Código | `error`              | Quando                                        |
@@ -179,7 +201,7 @@ Estados possíveis (`status`):
 | `400`  | `invalid_request`    | Corpo inválido (ex.: falta `ref` ou `name`)   |
 | `401`  | `unauthorized`       | Chave ausente ou desconhecida                 |
 | `403`  | `forbidden`          | Falta o scope necessário                      |
-| `405`  | `method_not_allowed` | Método diferente de `GET`/`POST`              |
+| `405`  | `method_not_allowed` | Método diferente de `GET`/`POST` (`GET` só em `/gds`) |
 | `500`  | `internal_error`     | Erro do nosso lado                            |
 
 ## Adicionar um parceiro
@@ -190,7 +212,7 @@ Function, que passa a valer de imediato — sem redeploy:
 ```bash
 KEY=$(openssl rand -hex 32)
 
-supabase secrets set PARTNER_PORTAL_ONDA="{\"source\":\"portal-onda\",\"key\":\"$KEY\",\"scopes\":[\"gd_requests:read\",\"gd_requests:write\"]}"
+supabase secrets set PARTNER_PORTAL_ONDA="{\"source\":\"portal-onda\",\"key\":\"$KEY\",\"scopes\":[\"gd_requests:read\",\"gd_requests:write\",\"gds:read\"]}"
 ```
 
 A chave — o valor de `key` — é o que entregas ao parceiro. Rodar a chave é

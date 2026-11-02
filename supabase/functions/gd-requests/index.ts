@@ -25,13 +25,19 @@
 // the runtime and never leaves it. The RPCs are granted to `service_role` only,
 // so this function is the sole way in.
 //
-//   POST /functions/v1/gd-requests   create/upsert  (scope gd_requests:write)
-//   GET  /functions/v1/gd-requests   read statuses  (scope gd_requests:read)
+//   POST /functions/v1/gd-requests       create/upsert  (scope gd_requests:write)
+//   GET  /functions/v1/gd-requests       read statuses  (scope gd_requests:read)
+//   GET  /functions/v1/gd-requests/gds   list active GDs (scope gds:read)
+//
+// The GD list is names and meeting times only — no people, no staff. The
+// Portal uses it to add GDs created here (e.g. after a multiplication) to its
+// own catalogue, so a new GD shows up in its forms without anyone retyping it.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const SCOPE_WRITE = "gd_requests:write";
 const SCOPE_READ = "gd_requests:read";
+const SCOPE_GDS = "gds:read";
 const SOURCE_RE = /^[a-z0-9][a-z0-9_-]{0,59}$/;
 const SECRET_PREFIX = "PARTNER_";
 
@@ -224,17 +230,51 @@ async function handleGet(req: Request, source: string): Promise<Response> {
   return json({ requests });
 }
 
+interface GdRow {
+  id: string;
+  name: string;
+  weekday: number | null;
+  start_time: string | null;
+}
+
+/** Active GDs only: a GD closed here should not be offered to new people by a
+ *  partner either. Read with the service role (RLS limits `gds` to linked
+ *  staff), so only these four columns ever leave the database. */
+async function handleListGds(): Promise<Response> {
+  const { data, error } = await db
+    .from("gds")
+    .select("id, name, weekday, start_time")
+    .eq("active", true)
+    .order("name");
+  if (error) return dbError(error);
+
+  const gds = ((data ?? []) as GdRow[]).map((g) => ({
+    id: g.id,
+    name: g.name,
+    weekday: g.weekday,
+    startTime: g.start_time ? g.start_time.slice(0, 5) : null,
+  }));
+  return json({ gds });
+}
+
+const isGdsRoute = (req: Request) => /\/gds\/?$/.test(new URL(req.url).pathname);
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: CORS });
   }
 
-  const scope = req.method === "POST" ? SCOPE_WRITE : req.method === "GET" ? SCOPE_READ : null;
+  const gdsRoute = isGdsRoute(req);
+  if (gdsRoute && req.method !== "GET") return json({ error: "method_not_allowed" }, 405);
+  const scope = gdsRoute
+    ? SCOPE_GDS
+    : req.method === "POST" ? SCOPE_WRITE : req.method === "GET" ? SCOPE_READ : null;
   if (scope === null) return json({ error: "method_not_allowed" }, 405);
 
   try {
     const partner = authorize(req, scope);
     if (partner instanceof Response) return partner;
+    if (gdsRoute) return await handleListGds();
     return req.method === "POST"
       ? await handlePost(req, partner.source)
       : await handleGet(req, partner.source);

@@ -76,7 +76,7 @@ supabase functions deploy gd-requests        # verify_jwt is off (see supabase/c
 
 # One secret per partner: `source` is what the database stores, `scopes` what the
 # partner may do. Takes effect immediately — no redeploy.
-supabase secrets set PARTNER_PORTAL_ONDA='{"source":"portal-onda","key":"<chave>","scopes":["gd_requests:read","gd_requests:write"]}'
+supabase secrets set PARTNER_PORTAL_ONDA='{"source":"portal-onda","key":"<chave>","scopes":["gd_requests:read","gd_requests:write","gds:read"]}'
 ```
 
 Adding a partner, rotating a key, or granting a new permission is a secret
